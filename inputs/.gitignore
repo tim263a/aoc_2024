@@ -1,0 +1,4 @@
+# Inputs should not be committed to git.
+/*
+
+!.gitignore
