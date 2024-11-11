@@ -2,7 +2,7 @@
 
 (
     cd build
-    cmake ..
+    cmake -GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
 
     cmake --build .
 )
@@ -18,8 +18,23 @@ else
     exit 1
 fi
 
-(
+( # Run tests.
     cd build
 
-    echo $file_content | ./aoc_wannabe
+    ctest . --output-on-failure
+
+    if [ $? != 0 ]; then
+        echo "Tests failed!"
+        exit 1
+    fi
+)
+
+echo ""
+
+( # Execute binary.
+    cd build
+
+    echo "Using file $file_path as input."
+
+    echo $file_content | ./aoc_main
 )
