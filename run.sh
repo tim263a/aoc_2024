@@ -10,7 +10,11 @@ fi
 (
     cd build
 
-    cmake -GNinja -DDAY_IDX=$day_idx -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ../code
+    cmake -GNinja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DDAY_IDX=$day_idx \
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+        ../code
 
     cmake --build .
 )
