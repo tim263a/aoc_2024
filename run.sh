@@ -36,5 +36,5 @@ echo ""
 
     echo "Using file $file_path as input."
 
-    echo $file_content | ./aoc_main
+    echo "$file_content" | ./aoc_main
 )
