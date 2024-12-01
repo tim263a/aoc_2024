@@ -12,7 +12,10 @@ add_subdirectory(
 # Common code base target (INTERFACE library)
 add_library(common INTERFACE)
 target_sources(common
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/util/read_input.cpp
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src/util/read_input.cpp
+)
+target_include_directories(common
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/api
 )
 
 # Main method target
