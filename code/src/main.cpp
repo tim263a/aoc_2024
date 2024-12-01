@@ -79,8 +79,8 @@ int main(int argc, char** argv)
     uint32_t dayIdx = argc >= 2 ? std::stoi(argv[1]) : DAY_IDX;
     g_verbose = argc >= 3 && (argv[2] == std::string("1"));
 
-    printFmt("Running for day {:d}, ", dayIdx);
-    printFmt("debug {:s}\n", g_verbose ? "enabled" : "disabled");
+    debugFmt("Running for day {:d}, ", dayIdx);
+    debugFmt("debug {:s}\n", g_verbose ? "enabled" : "disabled");
 
     std::cin.sync_with_stdio(false);
     std::cin.tie(nullptr);
