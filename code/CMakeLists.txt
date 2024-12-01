@@ -17,6 +17,11 @@ target_sources(common
 target_include_directories(common
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/api
 )
+if (${DAY_IDX})
+    target_compile_definitions(common
+        INTERFACE -DDAY_IDX=${DAY_IDX}
+    )
+endif()
 
 # Main method target
 add_executable(aoc_main)

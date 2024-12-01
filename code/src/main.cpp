@@ -11,6 +11,8 @@
 #include "util/read_input.h"
 #include "util/print_fmt.h"
 
+bool g_verbose = false;
+
 uint64_t calculatePart1Sum(
     const std::vector<uint32_t>& l1,
     const std::vector<uint32_t>& l2)
@@ -24,12 +26,12 @@ uint64_t calculatePart1Sum(
 
         uint32_t diff = std::abs(v1 - v2);
 
-        printFmt("{:d} {:d} {:d}\n", v1, v2, diff);
+        // printFmt("{:d} {:d} {:d}\n", v1, v2, diff);
 
         sum += diff;
     }
 
-    printFmt("Sum off differences: {:d}\n", sum);
+    // printFmt("Sum off differences: {:d}\n", sum);
 
     return sum;
 }
@@ -66,7 +68,7 @@ uint64_t calculatePart2Sum(
 
         sum += vLeft * multitude;
 
-        printFmt("{:d} {:d} {:d}\n", vLeft, multitude, sum);
+        // printFmt("{:d} {:d} {:d}\n", vLeft, multitude, sum);
     }
 
     return sum;
@@ -74,6 +76,12 @@ uint64_t calculatePart2Sum(
 
 int main(int argc, char** argv)
 {
+    uint32_t dayIdx = argc >= 2 ? std::stoi(argv[1]) : DAY_IDX;
+    g_verbose = argc >= 3 && (argv[2] == std::string("1"));
+
+    printFmt("Running for day {:d}, ", dayIdx);
+    printFmt("debug {:s}\n", g_verbose ? "enabled" : "disabled");
+
     std::cin.sync_with_stdio(false);
     std::cin.tie(nullptr);
 

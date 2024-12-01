@@ -1,8 +1,16 @@
 #!/bin/bash
 
+day_idx=-1
+
+if [ $# -gt 0 ]
+then
+    day_idx=$1
+fi
+
 (
     cd build
-    cmake -GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ../code
+
+    cmake -GNinja -DDAY_IDX=$day_idx -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ../code
 
     cmake --build .
 )
