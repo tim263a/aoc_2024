@@ -1,3 +1,4 @@
+#include <chrono>
 #include <cstdint>
 #include <cstdio>
 
@@ -14,6 +15,8 @@ bool g_verbose = false;
 
 int main(int argc, char** argv)
 {
+    auto start = std::chrono::high_resolution_clock::now();
+
     uint32_t dayIdx = argc >= 2 ? std::stoi(argv[1]) : DAY_IDX;
     g_verbose = argc >= 3 && (argv[2] == std::string("1"));
 
@@ -30,8 +33,10 @@ int main(int argc, char** argv)
     uint64_t part1 = day->calculatePart1();
     uint64_t part2 = day->calculatePart2();
 
-    printFmt("Solution part 1: {:d}\n", part1);
-    printFmt("Solution part 2: {:d}\n", part2);
+    printFmt("{:d} {:d}\n", part1, part2);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    printFmt("{}", end - start);
 
     return 0;
 }
