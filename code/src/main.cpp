@@ -26,12 +26,12 @@ uint64_t calculatePart1Sum(
 
         uint32_t diff = std::abs(v1 - v2);
 
-        // printFmt("{:d} {:d} {:d}\n", v1, v2, diff);
+        debugFmt("{:d} {:d} {:d}\n", v1, v2, diff);
 
         sum += diff;
     }
 
-    // printFmt("Sum off differences: {:d}\n", sum);
+     debugFmt("Sum off differences: {:d}\n", sum);
 
     return sum;
 }
@@ -68,7 +68,7 @@ uint64_t calculatePart2Sum(
 
         sum += vLeft * multitude;
 
-        // printFmt("{:d} {:d} {:d}\n", vLeft, multitude, sum);
+         debugFmt("{:d} {:d} {:d}\n", vLeft, multitude, sum);
     }
 
     return sum;
