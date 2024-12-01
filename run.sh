@@ -7,10 +7,12 @@
     cmake --build .
 )
 
+build_only=0
+
 file_path=inputs/day_$1.txt
 if [ $# -lt 1 ]; then
     echo "Usage: $0 <day_index>"
-    exit 1
+    build_only=1
 elif [ -f $file_path ]; then
     file_content=$(cat $file_path)
 else
@@ -28,6 +30,13 @@ fi
         exit 1
     fi
 )
+
+if [ $build_only -ne 0 ]
+then
+    echo "Running in build only mode."
+    echo "See usage above for how to execute for a certain day."
+    exit 1
+fi
 
 echo ""
 
