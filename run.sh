@@ -7,6 +7,11 @@
     cmake --build .
 )
 
+if [ $? != 0 ]; then
+    echo "Build failed!"
+    exit 1
+fi
+
 build_only=0
 
 file_path=inputs/day_$1.txt
