@@ -45,5 +45,5 @@ echo ""
 
     echo "Using file $file_path as input."
 
-    echo "$file_content" | ./aoc_main
+    time echo "$file_content" | ./aoc_main "$@"
 )
