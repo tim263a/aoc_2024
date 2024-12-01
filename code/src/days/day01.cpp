@@ -10,7 +10,11 @@
 void Day01::parseInput()
 {
     std::vector<std::string> input = read_stdin_lines();
-    debugFmt("Read {:d} lines from stdin\n", input.size());
+
+    size_t nLines = input.size();
+    debugFmt("Read {:d} lines from stdin\n", nLines);
+    l1.reserve(nLines);
+    l2.reserve(nLines);
 
     for (const std::string& line : input)
     {
