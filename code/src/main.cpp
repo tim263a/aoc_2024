@@ -3,13 +3,13 @@
 #include <cstdio>
 
 #include <algorithm>
-#include <format>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "util/read_input.h"
+#include "util/print_fmt.h"
 
 uint64_t calculatePart1Sum(
     const std::vector<uint32_t>& l1,
@@ -24,12 +24,12 @@ uint64_t calculatePart1Sum(
 
         uint32_t diff = std::abs(v1 - v2);
 
-        printf("%s\n", std::format("{:d} {:d} {:d}", v1, v2, diff).c_str());
+        printFmt("{:d} {:d} {:d}\n", v1, v2, diff);
 
         sum += diff;
     }
 
-    printf("Sum off differences: %lu\n", sum);
+    printFmt("Sum off differences: {:d}\n", sum);
 
     return sum;
 }
@@ -66,7 +66,7 @@ uint64_t calculatePart2Sum(
 
         sum += vLeft * multitude;
 
-        printf("%u %u %lu\n", vLeft, multitude, sum);
+        printFmt("{:d} {:d} {:d}\n", vLeft, multitude, sum);
     }
 
     return sum;
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
     std::cin.tie(nullptr);
 
     std::vector<std::string> input = read_stdin_lines();
-    printf("Read %lu lines from stdin\n", input.size());
+    printFmt("Read {:d} lines from stdin\n", input.size());
 
     std::vector<uint32_t> l1;
     std::vector<uint32_t> l2;
@@ -103,8 +103,8 @@ int main(int argc, char** argv)
     uint64_t part1 = calculatePart1Sum(l1, l2);
     uint64_t part2 = calculatePart2Sum(l1, l2);
 
-    printf("Solution part 1: %lu\n", part1);
-    printf("Solution part 2: %lu\n", part2);
+    printFmt("Solution part 1: {:d}\n", part1);
+    printFmt("Solution part 2: {:d}\n", part2);
 
     return 0;
 }
