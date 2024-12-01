@@ -5,13 +5,15 @@ project(aoc_wannabe LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_subdirectory(lib/Catch2)
+add_subdirectory(
+    ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Catch2
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/Catch2)
 
 # Common code base target (INTERFACE library)
 add_library(common INTERFACE)
-# target_sources(common
-    # PRIVATE src/common.cpp
-# )
+target_sources(common
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/util/read_input.cpp
+)
 
 # Main method target
 add_executable(aoc_main)
