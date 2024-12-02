@@ -85,7 +85,7 @@ uint64_t Day01::calculatePart2()
 
         sum += vLeft * multitude;
 
-         debugFmt("{:d} {:d} {:d}\n", vLeft, multitude, sum);
+        debugFmt("{:d} {:d} {:d}\n", vLeft, multitude, sum);
     }
 
     return sum;

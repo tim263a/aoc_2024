@@ -10,6 +10,7 @@
 
 #include "days/day.h"
 #include "days/day01.h"
+#include "days/day02.h"
 
 bool g_verbose = false;
 
@@ -26,7 +27,17 @@ int main(int argc, char** argv)
     std::cin.sync_with_stdio(false);
     std::cin.tie(nullptr);
 
-    std::unique_ptr<Day> day = std::make_unique<Day01>();
+    std::unique_ptr<Day> day;
+    switch (dayIdx)
+    {
+        default:
+        case 1:
+            day = std::make_unique<Day01>();
+            break;
+        case 2:
+            day = std::make_unique<Day02>();
+            break;
+    }
 
     day->parseInput();
 
