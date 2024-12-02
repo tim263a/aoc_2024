@@ -11,6 +11,7 @@ class Day02 final
     : public Day
 {
     std::vector<std::string> m_lines;
+    std::vector<std::vector<int8_t>> m_diffs;
 
 public:
     void parseInput() override;

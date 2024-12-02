@@ -1,8 +1,11 @@
 #include "days/day02.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <cmath>
+#include <optional>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 #include "util/print_fmt.h"
@@ -11,6 +14,25 @@
 void Day02::parseInput()
 {
     m_lines = read_stdin_lines();
+
+    for (std::string& line : m_lines)
+    {
+        std::stringstream ss(line);
+
+        int32_t now = 0;
+        int32_t prev = 0;
+        ss >> prev;
+
+        std::vector<int8_t> diffs;
+
+        while (ss >> now)
+        {
+            diffs.push_back(now - prev);
+            prev = now;
+        }
+
+        m_diffs.emplace_back(std::move(diffs));
+    }
 }
 
 static int8_t signum(int8_t v)
@@ -69,54 +91,68 @@ uint64_t Day02::calculatePart1()
     return sum;
 }
 
+static bool isValid(const std::vector<int8_t> diffs, int32_t skipIndex)
+{
+    std::optional<bool> requiredSignbit;
+
+    for (int32_t i = 0; i < diffs.size(); i++)
+    {
+        int8_t diff = diffs[i];
+
+        bool skip = i == skipIndex;
+        bool skippedLast = (i - 1) == skipIndex;
+
+        if (skippedLast && i > 1)
+        {
+            diff += diffs[i - 1];
+            debugFmt("Added diff {} -> {}\n", diffs[i - 1], diff);
+        }
+
+        if (skip)
+        {
+            continue;
+        }
+
+        uint8_t abs = std::abs(diff);
+        if (!skip && (abs < 1 || abs > 3))
+        {
+            debugFmt("D1 {} {}\n", skipIndex, diff);
+            return false;
+        }
+
+        if (!skip && !requiredSignbit)
+        {
+            requiredSignbit = std::signbit(diff);
+        }
+        else if (!skip && requiredSignbit && std::signbit(diff) != *requiredSignbit)
+        {
+            debugFmt("D2 {}\n", skipIndex);
+            return false;
+        }
+    }
+
+    debugFmt("Valid (?)\n");
+    return true;
+}
+
 uint64_t Day02::calculatePart2()
 {
-    debugFmt("Read {:d} lines\n", m_lines.size());
+    debugFmt("Read {:d} diff lines\n", m_diffs.size());
 
     uint64_t sum = 0;
 
-    for (std::string& line : m_lines)
+    for (int32_t j = 0; j < m_diffs.size(); j++)
     {
-        std::stringstream ss(line);
+        const auto& lineDiffs = m_diffs[j];
 
-        std::optional<int8_t> lineSignum;
-        int32_t prev = 0;
-        int32_t now = 0;
-
-        uint32_t counter = 1;
-        uint32_t sgnFails = 0;
-        uint32_t absFails = 0;
-
-        ss >> prev;
-
-        while (ss >> now)
+        debugFmt("--- line {} ----- \n", j);
+        for (int32_t i = -1; i < (int32_t) lineDiffs.size(); i++)
         {
-            counter++;
-            int32_t diff = now - prev;
-            uint32_t abs = std::abs(diff);
-            debugFmt("({:d} {:d})", now, diff);
-            if (!lineSignum)
+            if (isValid(lineDiffs, i))
             {
-                lineSignum = signum(diff);
+                sum += 1;
+                break;
             }
-            else if (*lineSignum != signum(diff))
-            {
-                sgnFails++;
-            }
-
-            if (abs < 1 || abs > 3)
-            {
-                absFails++;
-            }
-
-            prev = now;
-        }
-
-        debugFmt(" --> {} {} {}\n", sgnFails, counter, absFails);
-
-        if ((sgnFails + absFails <= 1) || ((counter - sgnFails) + absFails) <= 1)
-        {
-            sum += 1;
         }
     }
 
