@@ -95,38 +95,40 @@ static bool isValid(const std::vector<int8_t> diffs, int32_t skipIndex)
 {
     std::optional<bool> requiredSignbit;
 
-    for (int32_t i = 0; i < diffs.size(); i++)
+    int32_t nDiffs = diffs.size();
+
+    bool skipStart = skipIndex == 0;
+    bool skipEnd = skipIndex == nDiffs;
+
+    for (int32_t i = skipStart; i < nDiffs - skipEnd; i++)
     {
+        if (i + 1 == skipIndex)
+        {
+            continue;
+        }
+
         int8_t diff = diffs[i];
 
-        bool skip = i == skipIndex;
-        bool skippedLast = (i - 1) == skipIndex;
-
-        if (skippedLast && i > 1)
+        if (i == skipIndex)
         {
             diff += diffs[i - 1];
             debugFmt("Added diff {} -> {}\n", diffs[i - 1], diff);
         }
 
-        if (skip)
-        {
-            continue;
-        }
-
         uint8_t abs = std::abs(diff);
-        if (!skip && (abs < 1 || abs > 3))
+        if (abs < 1 || abs > 3)
         {
-            debugFmt("D1 {} {}\n", skipIndex, diff);
+            debugFmt("{:+d} D1 {} {}\n", skipIndex, i, diff);
             return false;
         }
 
-        if (!skip && !requiredSignbit)
+        if (!requiredSignbit)
         {
             requiredSignbit = std::signbit(diff);
         }
-        else if (!skip && requiredSignbit && std::signbit(diff) != *requiredSignbit)
+        else if (requiredSignbit && std::signbit(diff) != *requiredSignbit)
         {
-            debugFmt("D2 {}\n", skipIndex);
+            debugFmt("{:+d} D2 {}\n", skipIndex, i, diff);
             return false;
         }
     }
@@ -146,7 +148,7 @@ uint64_t Day02::calculatePart2()
         const auto& lineDiffs = m_diffs[j];
 
         debugFmt("--- line {} ----- \n", j);
-        for (int32_t i = -1; i < (int32_t) lineDiffs.size(); i++)
+        for (int32_t i = -1; i <= (int32_t) lineDiffs.size(); i++)
         {
             if (isValid(lineDiffs, i))
             {
