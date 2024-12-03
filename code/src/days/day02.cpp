@@ -35,62 +35,6 @@ void Day02::parseInput()
     }
 }
 
-static int8_t signum(int8_t v)
-{
-    return v == 0 ? 0 : (std::signbit(v) ? -1 : 1);
-}
-
-uint64_t Day02::calculatePart1()
-{
-    debugFmt("Read {:d} lines\n", m_lines.size());
-
-    uint64_t sum = 0;
-
-    for (std::string& line : m_lines)
-    {
-        std::stringstream ss(line);
-
-        std::optional<int8_t> lineSignum;
-        int32_t prev = 0;
-        int32_t now = 0;
-
-        bool fail = false;
-
-        ss >> prev;
-
-        while (ss >> now)
-        {
-            int32_t diff = now - prev;
-            uint32_t abs = std::abs(diff);
-            debugFmt("({:d} {:d})", now, diff);
-            if (!lineSignum)
-            {
-                lineSignum = signum(diff);
-            }
-            else if (*lineSignum != signum(diff))
-            {
-                fail = true;
-            }
-
-            if (abs < 1 || abs > 3)
-            {
-                fail = true;
-            }
-
-            prev = now;
-        }
-
-        debugFmt(" --> {}\n", !fail);
-
-        if (!fail)
-        {
-            sum += 1;
-        }
-    }
-
-    return sum;
-}
-
 static bool isValid(const std::vector<int8_t> diffs, int32_t skipIndex)
 {
     std::optional<bool> requiredSignbit;
@@ -135,6 +79,22 @@ static bool isValid(const std::vector<int8_t> diffs, int32_t skipIndex)
 
     debugFmt("Valid (?)\n");
     return true;
+}
+
+uint64_t Day02::calculatePart1()
+{
+    debugFmt("Read {:d} lines\n", m_diffs.size());
+
+    uint64_t sum = 0;
+
+    for (int32_t j = 0; j < m_diffs.size(); j++)
+    {
+        const auto& lineDiffs = m_diffs[j];
+
+        sum += isValid(lineDiffs, -1);
+    }
+
+    return sum;
 }
 
 uint64_t Day02::calculatePart2()
