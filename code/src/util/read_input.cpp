@@ -16,8 +16,10 @@ void read_stdio_into_buffer(std::vector<uint8_t>& buffer)
         batchSize = FALLBACK_SIZE;
         buffer.reserve(alreadyRead + batchSize);
 
+#ifdef NDEBUG
         std::cerr << "Warning: Input buffer resize was required " <<
             alreadyRead << " --> " << (alreadyRead + batchSize) << std::endl;
+#endif
     }
 
     alreadyRead += std::cin.gcount();
