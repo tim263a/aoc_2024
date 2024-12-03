@@ -5,6 +5,8 @@ project(aoc_wannabe LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -fdata-sections -ffunction-sections")
+
 add_subdirectory(
     ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Catch2
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Catch2)
@@ -35,6 +37,9 @@ target_sources(aoc_main
 )
 target_link_libraries(aoc_main
     common
+)
+target_link_options(aoc_main
+    PUBLIC "-Wl,--gc-sections"
 )
 
 # Test main target for catch_discover_tests
