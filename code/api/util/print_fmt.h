@@ -20,3 +20,10 @@ void debugFmt(std::format_string<Args...> format, Args... args)
         std::printf("%s", std::format(format, std::forward<Args>(args)...).c_str());
     }
 }
+
+#if NDEBUG
+    #define DEBUG_FMT(...) \
+        if (g_verbose) debugFmt(__VA_ARGS__)
+#else
+    #define DEBUG_FMT(...) ;
+#endif

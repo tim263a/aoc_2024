@@ -12,7 +12,7 @@ void Day01::parseInput()
     std::vector<std::string> input = read_stdin_lines();
 
     size_t nLines = input.size();
-    debugFmt("Read {:d} lines from stdin\n", nLines);
+    DEBUG_FMT("Read {:d} lines from stdin\n", nLines);
     l1.reserve(nLines);
     l2.reserve(nLines);
 
@@ -45,12 +45,12 @@ uint64_t Day01::calculatePart1()
 
         uint32_t diff = std::abs(v1 - v2);
 
-        debugFmt("{:d} {:d} {:d}\n", v1, v2, diff);
+        DEBUG_FMT("{:d} {:d} {:d}\n", v1, v2, diff);
 
         sum += diff;
     }
 
-    debugFmt("Sum off differences: {:d}\n", sum);
+    DEBUG_FMT("Sum off differences: {:d}\n", sum);
 
     return sum;
 }
@@ -85,7 +85,7 @@ uint64_t Day01::calculatePart2()
 
         sum += vLeft * multitude;
 
-        debugFmt("{:d} {:d} {:d}\n", vLeft, multitude, sum);
+        DEBUG_FMT("{:d} {:d} {:d}\n", vLeft, multitude, sum);
     }
 
     return sum;

@@ -56,13 +56,13 @@ static bool isValid(const std::vector<int8_t> diffs, int32_t skipIndex)
         if (i == skipIndex)
         {
             diff += diffs[i - 1];
-            debugFmt("Added diff {} -> {}\n", diffs[i - 1], diff);
+            DEBUG_FMT("Added diff {} -> {}\n", diffs[i - 1], diff);
         }
 
         uint8_t abs = std::abs(diff);
         if (abs < 1 || abs > 3)
         {
-            debugFmt("{:+d} D1 {} {}\n", skipIndex, i, diff);
+            DEBUG_FMT("{:+d} D1 {} {}\n", skipIndex, i, diff);
             return false;
         }
 
@@ -72,18 +72,18 @@ static bool isValid(const std::vector<int8_t> diffs, int32_t skipIndex)
         }
         else if (requiredSignbit && std::signbit(diff) != *requiredSignbit)
         {
-            debugFmt("{:+d} D2 {}\n", skipIndex, i, diff);
+            DEBUG_FMT("{:+d} D2 {}\n", skipIndex, i, diff);
             return false;
         }
     }
 
-    debugFmt("Valid (?)\n");
+    DEBUG_FMT("Valid (?)\n");
     return true;
 }
 
 uint64_t Day02::calculatePart1()
 {
-    debugFmt("Read {:d} lines\n", m_diffs.size());
+    DEBUG_FMT("Read {:d} lines\n", m_diffs.size());
 
     uint64_t sum = 0;
 
@@ -99,7 +99,7 @@ uint64_t Day02::calculatePart1()
 
 uint64_t Day02::calculatePart2()
 {
-    debugFmt("Read {:d} diff lines\n", m_diffs.size());
+    DEBUG_FMT("Read {:d} diff lines\n", m_diffs.size());
 
     uint64_t sum = 0;
 
@@ -107,7 +107,7 @@ uint64_t Day02::calculatePart2()
     {
         const auto& lineDiffs = m_diffs[j];
 
-        debugFmt("--- line {} ----- \n", j);
+        DEBUG_FMT("--- line {} ----- \n", j);
         for (int32_t i = -1; i <= (int32_t) lineDiffs.size(); i++)
         {
             if (isValid(lineDiffs, i))

@@ -48,7 +48,7 @@ static int_fast16_t getNumber(
 
 uint64_t Day03::calculatePart1()
 {
-    debugFmt("Read {} characters\n", m_buffer.size());
+    DEBUG_FMT("Read {} characters\n", m_buffer.size());
     uint64_t sum = 0;
 
     bool enabled = true;
@@ -59,7 +59,7 @@ uint64_t Day03::calculatePart1()
 
         if (ptr[0] == '\n')
         {
-            debugFmt("\n\n");
+            DEBUG_FMT("\n\n");
             continue;
         }
 
@@ -87,17 +87,17 @@ uint64_t Day03::calculatePart1()
         uint_fast8_t j = 0;
         int_fast16_t operand1 = getNumber(ptr, j, ',', foundDelim, error);
 
-        // debugFmt("operand1 for {}: {} foundComma {}\n", i, operand1, foundDelim);
+        // DEBUG_FMT("operand1 for {}: {} foundComma {}\n", i, operand1, foundDelim);
 
         if (error || (!foundDelim && j != 3))
         {
-            // debugFmt("D1 {}\n", error);
+            // DEBUG_FMT("D1 {}\n", error);
             continue;
         }
 
         if (ptr[j] != ',')
         {
-            // debugFmt("D2\n");
+            // DEBUG_FMT("D2\n");
             continue;
         }
 
@@ -105,7 +105,7 @@ uint64_t Day03::calculatePart1()
 
         int_fast16_t operand2 = getNumber(ptr, j, ')', foundDelim, error);
 
-        // debugFmt("operand2 for {}: {} foundDelim {}\n", i, operand2, foundDelim);
+        // DEBUG_FMT("operand2 for {}: {} foundDelim {}\n", i, operand2, foundDelim);
 
         if (error || (!foundDelim && j != 3))
         {
@@ -117,7 +117,7 @@ uint64_t Day03::calculatePart1()
             continue;
         }
 
-        debugFmt("mul({},{})", operand1, operand2);
+        DEBUG_FMT("mul({},{})", operand1, operand2);
 
         sum += operand1 * operand2;
         m_part2 += enabled * operand1 * operand2;
