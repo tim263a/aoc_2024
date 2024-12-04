@@ -7,7 +7,7 @@
 #include "util/read_input.h"
 
 Day03::Day03()
-    : m_buffer(42000, 0)
+    : m_buffer(32000, 0)
     , m_part2(0)
 {
 }

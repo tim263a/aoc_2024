@@ -14,7 +14,7 @@ void read_stdio_into_buffer(std::vector<uint8_t>& buffer)
     {
         alreadyRead += batchSize;
         batchSize = FALLBACK_SIZE;
-        buffer.reserve(alreadyRead + batchSize);
+        buffer.resize(alreadyRead + batchSize);
 
 #ifdef NDEBUG
         std::cerr << "Warning: Input buffer resize was required " <<
