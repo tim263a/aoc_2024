@@ -5,6 +5,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <string_view>
 
 Day04::Day04() = default;
@@ -37,9 +38,9 @@ static int_fast16_t checkOrReset(
         return 0;
     }
 
-    if (result == 4)
+    if (result == 4) [[unlikely]]
     {
-        printFmt("{} row {} column {}\n", checkIdx, rowIdx, columnIdx);
+        // printFmt("{} row {} column {}\n", checkIdx, rowIdx, columnIdx);
 
         counter += 1;
         result = 0;
@@ -61,7 +62,7 @@ uint64_t Day04::calculatePart1()
     auto it = m_buffer.begin();
     for (; *it != '\n'; it++, lineLength++) { }
 
-    printFmt("Line Length {}\n", lineLength);
+    // printFmt("Line Length {}\n", lineLength);
 
     // Runlengths of:
     // 0 - down right
@@ -86,6 +87,24 @@ uint64_t Day04::calculatePart1()
     {
         rowIdx = lineIdx;
         columnIdx = idx;
+
+        if (*it == 'A' &&
+            idx > 1 && idx < lineLength && lineIdx > 1 && std::distance(it, m_buffer.end()) > lineLength)
+        {
+            auto c1 = *(it - (lineLength + 1) - 1);
+            auto c2 = *(it - (lineLength + 1) + 1);
+            auto c3 = *(it + (lineLength + 1) - 1);
+            auto c4 = *(it + (lineLength + 1) + 1);
+
+            if (((c1 == 'M' && c4 == 'S') || (c1 == 'S' && c4 == 'M')) &&
+                ((c2 == 'M' && c3 == 'S') || (c2 == 'S' && c3 == 'M')))
+            {
+                printFmt("{}|{}, ", rowIdx, columnIdx);
+                printFmt("idx {}, lineLength {}, lineIdx {}, distance {}\n",
+                    idx, lineLength, lineIdx, std::distance(it, m_buffer.end()));
+                m_part2 += 1;
+            }
+        }
 
         switch (*it)
         {
@@ -137,7 +156,5 @@ uint64_t Day04::calculatePart1()
 
 uint64_t Day04::calculatePart2()
 {
-    uint64_t sum = 0;
-
-    return sum;
+    return m_part2;
 }

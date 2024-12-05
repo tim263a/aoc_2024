@@ -10,6 +10,7 @@ class Day04 final
     : public Day
 {
     std::vector<uint8_t> m_buffer;
+    uint64_t m_part2 = 0;
 
 public:
     Day04();
