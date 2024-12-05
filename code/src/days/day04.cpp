@@ -54,7 +54,7 @@ constexpr std::string_view BACKWARDS = "SAMX";
 
 uint64_t Day04::calculatePart1()
 {
-    printFmt("Read {} characters\n", m_buffer.size());
+    DEBUG_FMT("Read {} characters\n", m_buffer.size());
     uint64_t sum = 0;
 
     std::size_t lineLength = 0;
@@ -99,8 +99,8 @@ uint64_t Day04::calculatePart1()
             if (((c1 == 'M' && c4 == 'S') || (c1 == 'S' && c4 == 'M')) &&
                 ((c2 == 'M' && c3 == 'S') || (c2 == 'S' && c3 == 'M')))
             {
-                printFmt("{}|{}, ", rowIdx, columnIdx);
-                printFmt("idx {}, lineLength {}, lineIdx {}, distance {}\n",
+                DEBUG_FMT("{}|{}, ", rowIdx, columnIdx);
+                DEBUG_FMT("idx {}, lineLength {}, lineIdx {}, distance {}\n",
                     idx, lineLength, lineIdx, std::distance(it, m_buffer.end()));
                 m_part2 += 1;
             }
