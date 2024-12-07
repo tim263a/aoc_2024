@@ -3,6 +3,11 @@
 #include "util/print_fmt.h"
 #include "util/read_input.h"
 
+Day07::Day03()
+{
+
+}
+
 void Day03::parseInput()
 {
 }
