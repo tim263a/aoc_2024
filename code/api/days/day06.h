@@ -4,6 +4,7 @@
 
 #include <cstdint>
 
+#include <string_view>
 #include <tuple>
 #include <unordered_set>
 #include <vector>
@@ -29,6 +30,9 @@ class Day06 final
     std::vector<uint8_t> m_buffer;
 
     std::unordered_set<int> m_visited;
+
+    static int calculateOverlap(
+        std::vector<Segment>& segments, std::string_view direction);
 
 public:
     Day06();

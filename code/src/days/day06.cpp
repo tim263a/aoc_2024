@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdio>
+#include <iterator>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -45,6 +46,92 @@ int findWall(std::vector<int> walls, int startPos, int direction)
     }
 
     return pos[direction == -1 ? -1 : 0];
+}
+
+// static
+int Day06::calculateOverlap(
+    std::vector<Segment>& segments, std::string_view direction)
+{
+    int overlaps = 0;
+
+    for (auto it = segments.begin(); it != segments.end(); it++)
+    {
+        int orthoPos = it->orthoPos;
+
+        auto itEndSameOrth = it + 1;
+        while (itEndSameOrth != segments.end() &&
+            itEndSameOrth->orthoPos == orthoPos)
+        {
+            itEndSameOrth++;
+        }
+        itEndSameOrth -= 1;
+
+        std::size_t nAligned = std::distance(it, itEndSameOrth);
+        if (nAligned)
+        {
+            printFmt("Same Y orthoPos {}: {}\n", orthoPos, nAligned);
+
+            for (std::size_t i = 0; i < nAligned; i++)
+            {
+                for (std::size_t j = i + 1; j <= nAligned; j++)
+                {
+                    Segment s1 = it[i];
+                    Segment s2 = it[j];
+
+                    if (s1.end < s2.start)
+                    {
+                        continue;
+                    }
+
+                    int overlap = s1.end - s2.start + 1;
+                    if (s2.end < s1.end)
+                    {
+                        overlap -= s1.end - s2.end;
+                    }
+
+                    printFmt("Overlap: {}\n", overlap);
+                    overlaps += overlap;
+                }
+            }
+
+            for (std::size_t i = 0; i < nAligned; i++)
+            {
+                for (std::size_t j = i + 1; j <= nAligned; j++)
+                {
+                    Segment& s1 = it[i];
+                    Segment& s2 = it[j];
+
+                    if (s1.start > s2.start)
+                    {
+                        std::swap(s1, s2);
+                    }
+
+                    if (s1.end < s2.start)
+                    {
+                        continue;
+                    }
+
+                    int oldEnd1 = s1.end;
+                    int oldEnd2 = s2.end;
+                    int oldStart2 = s2.start;
+
+                    if (s1.start == s2.start)
+                    {
+                        s2.start = s1.start + 1;
+                    }
+
+                    s2.end = std::max(s1.end, s2.end);
+                    s1.end = s2.start - 1;
+
+                    printFmt("Rewrote segment: ({}, {}) ({}, {}) -> ({}, {}) ({}, {})\n",
+                        s1.start, oldEnd1, oldStart2, oldEnd2,
+                        s1.start, s1.end, s2.start, s2.end);
+                }
+            }
+        }
+    }
+
+    return overlaps;
 }
 
 uint64_t Day06::calculatePart1()
@@ -113,7 +200,7 @@ uint64_t Day06::calculatePart1()
             break;
         }
 
-        jumpLength += std::abs(sightlinePos - posWall);
+        jumpLength += std::abs(sightlinePos - posWall) - 1;
 
         int s1 = sightlinePos;
         int s2 = posWall - 2 * direction;
@@ -157,17 +244,34 @@ uint64_t Day06::calculatePart1()
             segment.orthoPos, segment.start, segment.end, segment.end - segment.start);
     }
 
+    int intersections = 0;
+    int overlaps = 0;
+
+    // Calculate overlaps.
+
     std::sort(m_segmentsX.begin(), m_segmentsX.end(),
         [] (const Segment& s1, const Segment& s2) {
-            return s1.start < s2.start;
+            return s1.orthoPos < s2.orthoPos || (s1.orthoPos == s2.orthoPos && s1.start < s2.start);
         });
 
     std::sort(m_segmentsY.begin(), m_segmentsY.end(),
         [] (const Segment& s1, const Segment& s2) {
-            return s1.orthoPos < s2.orthoPos;
+            return s1.orthoPos < s2.orthoPos || (s1.orthoPos == s2.orthoPos && s1.start < s2.start);
         });
 
-    int intersections = 1;
+    overlaps += calculateOverlap(m_segmentsX, "X");
+    overlaps += calculateOverlap(m_segmentsY, "Y");
+
+    // TODO: During overlap check, modify lines so they do not overlap for
+    // intersection checks anymore - otherwise intersection might get subtracted
+    // twice.
+
+    // Calculate intersections between x and y segments.
+
+    std::sort(m_segmentsX.begin(), m_segmentsX.end(),
+        [] (const Segment& s1, const Segment& s2) {
+            return s1.start < s2.start;
+        });
 
     auto itYSearchStart = m_segmentsY.cbegin();
     for (const auto& sX : m_segmentsX)
@@ -177,11 +281,14 @@ uint64_t Day06::calculatePart1()
         int end = sX.end;
 
         while (itYSearchStart != m_segmentsY.cend() &&
-            itYSearchStart->orthoPos < start) { }
+            itYSearchStart->orthoPos < start)
+        {
+            itYSearchStart += 1;
+        }
 
         auto itYSearch = itYSearchStart;
 
-        for (auto itY = itYSearchStart; itY != m_segmentsY.cend() && itY->orthoPos < end; itY++)
+        for (auto itY = itYSearchStart; itY != m_segmentsY.cend() && itY->orthoPos <= end; itY++)
         {
             if (itY->start > orthoPos || itY->end < orthoPos)
             {
@@ -196,7 +303,9 @@ uint64_t Day06::calculatePart1()
         }
     }
 
-    return jumpLength - intersections;
+    printFmt("P1: jumpLength {} intersections {} overlaps {}\n",
+        jumpLength, intersections, overlaps);
+    return jumpLength - intersections - overlaps;
 }
 
 uint64_t Day06::calculatePart2()
