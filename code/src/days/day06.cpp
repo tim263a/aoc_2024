@@ -22,12 +22,12 @@ void Day06::parseInput()
 
 int findWall(std::vector<int> walls, int startPos, int direction)
 {
-    printFmt("startPos {} direction {} Known Walls: ", startPos, direction);
+    DEBUG_FMT("startPos {} direction {} Known Walls: ", startPos, direction);
     for (auto wall : walls)
     {
-        printFmt("{} ", wall);
+        DEBUG_FMT("{} ", wall);
     }
-    printFmt("\n");
+    DEBUG_FMT("\n");
 
     auto pos = std::find_if(walls.cbegin(), walls.cend(), [startPos] (int value) {
         return value >= startPos;
@@ -49,8 +49,6 @@ int findWall(std::vector<int> walls, int startPos, int direction)
 
 uint64_t Day06::calculatePart1()
 {
-    uint64_t sum = 0;
-
     std::size_t width = 0;
     for (auto it = m_buffer.cbegin(); *it != '\n'; it++, width++) { }
     std::size_t height = m_buffer.size() / (width + 1);
@@ -118,7 +116,7 @@ uint64_t Day06::calculatePart1()
         jumpLength += std::abs(sightlinePos - posWall);
 
         int s1 = sightlinePos;
-        int s2 = posWall - direction;
+        int s2 = posWall - 2 * direction;
         segmentsFaced->push_back({
             .orthoPos = orthogonalPos,
             .start = std::min(s1, s2),
@@ -147,7 +145,7 @@ uint64_t Day06::calculatePart1()
 
     printFmt("Jumped {} times, jumpLength {}\n", testSteps, jumpLength);
 
-    printFmt("Segments:\n");
+    printFmt("Segments x {} y {}:\n", m_segmentsX.size(), m_segmentsY.size());
     for (auto segment : m_segmentsX)
     {
         printFmt("X ortho {} start {} end {} length {}\n",
@@ -159,7 +157,46 @@ uint64_t Day06::calculatePart1()
             segment.orthoPos, segment.start, segment.end, segment.end - segment.start);
     }
 
-    return sum;
+    std::sort(m_segmentsX.begin(), m_segmentsX.end(),
+        [] (const Segment& s1, const Segment& s2) {
+            return s1.start < s2.start;
+        });
+
+    std::sort(m_segmentsY.begin(), m_segmentsY.end(),
+        [] (const Segment& s1, const Segment& s2) {
+            return s1.orthoPos < s2.orthoPos;
+        });
+
+    int intersections = 1;
+
+    auto itYSearchStart = m_segmentsY.cbegin();
+    for (const auto& sX : m_segmentsX)
+    {
+        int orthoPos = sX.orthoPos;
+        int start = sX.start;
+        int end = sX.end;
+
+        while (itYSearchStart != m_segmentsY.cend() &&
+            itYSearchStart->orthoPos < start) { }
+
+        auto itYSearch = itYSearchStart;
+
+        for (auto itY = itYSearchStart; itY != m_segmentsY.cend() && itY->orthoPos < end; itY++)
+        {
+            if (itY->start > orthoPos || itY->end < orthoPos)
+            {
+                continue;
+            }
+
+            intersections += 1;
+
+            printFmt("Intersection candidate: xO {} xS {} xE {} yO {} yS {} yE {}\n",
+                sX.orthoPos, sX.start, sX.end,
+                itY->orthoPos, itY->start, itY->end);
+        }
+    }
+
+    return jumpLength - intersections;
 }
 
 uint64_t Day06::calculatePart2()
