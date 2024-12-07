@@ -4,6 +4,8 @@
 
 #include <cstdint>
 
+#include <tuple>
+#include <unordered_set>
 #include <vector>
 #include <unordered_map>
 
@@ -12,17 +14,21 @@ class Day06 final
 {
     struct Segment
     {
-        int pos1;
-        int pos2;
+        int orthoPos;
+
+        int start;
+        int end;
     };
 
     std::unordered_map<int, std::vector<int>> m_wallsX;
     std::unordered_map<int, std::vector<int>> m_wallsY;
 
-    std::vector<Segment> m_segmentsHorizontal;
-    std::vector<Segment> m_segmentsVertical;
+    std::vector<Segment> m_segmentsX;
+    std::vector<Segment> m_segmentsY;
 
     std::vector<uint8_t> m_buffer;
+
+    std::unordered_set<int> m_visited;
 
 public:
     Day06();
