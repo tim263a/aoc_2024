@@ -14,6 +14,11 @@ void read_stdio_into_buffer(std::vector<uint8_t>& buffer)
 {
     constexpr std::size_t FALLBACK_SIZE { 1024 };
 
+    if (buffer.size() == 0)
+    {
+        buffer.resize(FALLBACK_SIZE);
+    }
+
     ssize_t alreadyRead = 0;
     ssize_t batchSize = buffer.size();
 
@@ -27,19 +32,24 @@ void read_stdio_into_buffer(std::vector<uint8_t>& buffer)
             batchSize = FALLBACK_SIZE;
             buffer.resize(alreadyRead + batchSize);
 
-#ifdef NDEBUG
-            printf("Warning: Input buffer resized %d -> %d\n",
+            printf("Warning: Input buffer resized %ld -> %ld\n",
                 alreadyRead, alreadyRead + batchSize);
-#endif
         }
 
         bytesRead = read(STDIN_FILENO, buffer.data() + alreadyRead, batchSize);
-    } while (bytesRead > 0 && bytesRead < batchSize);
+        printf("Bytes read: %ld\n", bytesRead);
+    } while (bytesRead > 0 && bytesRead >= batchSize);
 
     if (bytesRead < 0)
     {
         printf("Could not read from stdin: %s\n", strerror(errno));
         std::exit(1);
+    }
+    else
+    {
+        alreadyRead += bytesRead;
+        buffer.resize(alreadyRead + 1);
+        *buffer.rbegin() = '\0';
     }
 }
 
