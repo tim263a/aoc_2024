@@ -68,5 +68,10 @@ echo ""
 
     echo "Using file $file_path as input."
 
-    time echo "$file_content" | ./aoc_main "$@"
+    echo "$file_content" > hyperfine_input.txt
+    rm hyperfile_output.txt
+
+    hyperfine --input ./hyperfine_input.txt --output ./hyperfine_output.txt "./aoc_main "$@""
+
+    tail hyperfine_output.txt
 )
