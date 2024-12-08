@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <iostream>
 
-void read_stdio_into_buffer(std::vector<uint8_t>& buffer)
+void read_stdio_into_buffer(std::vector<uint8_t>& buffer, bool verbose)
 {
     constexpr std::size_t FALLBACK_SIZE { 1024 };
 
@@ -28,7 +28,6 @@ void read_stdio_into_buffer(std::vector<uint8_t>& buffer)
         alreadyRead += bytesRead;
         if (alreadyRead) [[unlikely]]
         {
-            alreadyRead += batchSize;
             batchSize = FALLBACK_SIZE;
             buffer.resize(alreadyRead + batchSize);
 
@@ -37,7 +36,10 @@ void read_stdio_into_buffer(std::vector<uint8_t>& buffer)
         }
 
         bytesRead = read(STDIN_FILENO, buffer.data() + alreadyRead, batchSize);
-        printf("Bytes read: %ld\n", bytesRead);
+        if (verbose)
+        {
+            printf("Bytes read: %ld\n", bytesRead);
+        }
     } while (bytesRead > 0 && bytesRead >= batchSize);
 
     if (bytesRead < 0)
@@ -50,6 +52,11 @@ void read_stdio_into_buffer(std::vector<uint8_t>& buffer)
         alreadyRead += bytesRead;
         buffer.resize(alreadyRead + 1);
         *buffer.rbegin() = '\0';
+
+        if (verbose)
+        {
+            printf("Info: Input buffer resized -> %ld\n", alreadyRead + 1);
+        }
     }
 }
 

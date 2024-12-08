@@ -5,6 +5,7 @@
 #include <cstddef>
 
 Day08::Day08()
+    : m_buffer(16 * 1024)
 {
 
 }
