@@ -28,9 +28,15 @@ build_only=0
 
 file_path=inputs/day_$1.txt
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <day_index>"
+    echo "Usage: $0 <day_index> [<input_file>]"
     build_only=1
-elif [ -f $file_path ]; then
+elif [ $# -lt 2 ]; then
+    file_path=inputs/day_$1.txt
+elif [ $# -ge 2 ]; then
+    file_path=$2
+fi
+
+if [ $build_only -eq 0 ] && [ -f $file_path ]; then
     file_content=$(cat $file_path)
 else
     echo "File $file_path not found."
