@@ -1,5 +1,11 @@
 #include "util/read_input.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <cstdint>
 #include <cstddef>
 #include <iostream>
@@ -28,6 +34,39 @@ void read_stdio_into_buffer(std::vector<uint8_t>& buffer)
     if (std::cin.fail() && !std::cin.eof()) [[unlikely]]
     {
         std::cerr << "Error reading input\n";
+        std::exit(1);
+    }
+}
+
+void read_stdio_into_buffer_unistd(std::vector<uint8_t>& buffer)
+{
+    constexpr std::size_t FALLBACK_SIZE { 1024 };
+
+    ssize_t alreadyRead = 0;
+    ssize_t batchSize = buffer.size();
+
+    ssize_t bytesRead = 0;
+    do
+    {
+        alreadyRead += bytesRead;
+        if (alreadyRead) [[unlikely]]
+        {
+            alreadyRead += batchSize;
+            batchSize = FALLBACK_SIZE;
+            buffer.resize(alreadyRead + batchSize);
+
+#ifdef NDEBUG
+            printf("Warning: Input buffer resized %d -> %d\n",
+                alreadyRead, alreadyRead + batchSize);
+#endif
+        }
+
+        bytesRead = read(STDIN_FILENO, buffer.data() + alreadyRead, batchSize);
+    } while (bytesRead > 0 && bytesRead < batchSize);
+
+    if (bytesRead < 0)
+    {
+        printf("Could not read from stdin: %s\n", strerror(errno));
         std::exit(1);
     }
 }
