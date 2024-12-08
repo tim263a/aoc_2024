@@ -92,6 +92,19 @@ uint64_t Day08::calculatePart1()
                 printFmt("{}|{}|{}|{}-->", x1, y1, x2, y2);
                 printFmt("{}|{},", hX1, hY1);
                 printFmt("{}|{} ", hX2, hY2);
+
+                for (int k = -100; k < 100; k++)
+                {
+                    int hX3 = x2 + k * dX;
+                    int hY3 = y2 + k * dY;
+
+                    if (hX3 < 0 || hX3 >= lineWidth || hY3 < 0)
+                    {
+                        continue;
+                    }
+
+                    m_hashes2.insert(hY3 * lineWidth + hX3);
+                }
             }
 
             printFmt("\n");
@@ -102,10 +115,17 @@ uint64_t Day08::calculatePart1()
     {
         for (int j = 0; j < lineWidth; j++)
         {
-            if (m_hashes.contains(j * lineWidth + i))
+            int hash = j * lineWidth + i;
+            if (m_hashes.contains(hash))
             {
                 sum += 1;
+                m_part2 += 1;
                 printFmt("#");
+            }
+            else if (m_hashes2.contains(hash))
+            {
+                m_part2 += 1;
+                printFmt("%");
             }
             else
             {
@@ -120,7 +140,5 @@ uint64_t Day08::calculatePart1()
 
 uint64_t Day08::calculatePart2()
 {
-    uint64_t sum = 0;
-
-    return sum;
+    return m_part2;
 }

@@ -14,6 +14,7 @@ class Day08 final
 
     std::unordered_map<int, std::vector<std::pair<int, int>>> m_positions;
     std::unordered_set<int> m_hashes;
+    std::unordered_set<int> m_hashes2;
 
     uint64_t m_part2 = 0;
 
