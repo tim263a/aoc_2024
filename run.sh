@@ -69,9 +69,9 @@ echo ""
     echo "Using file $file_path as input."
 
     echo "$file_content" > hyperfine_input.txt
-    rm hyperfile_output.txt
+    rm -rf hyperfile_output.txt
 
-    hyperfine --input ./hyperfine_input.txt --output ./hyperfine_output.txt "./aoc_main "$@""
+    hyperfine --input ./hyperfine_input.txt --output ./hyperfine_output.txt --ignore-failure -- "./aoc_main $1"
 
-    tail hyperfine_output.txt
+    tail -n 100 hyperfine_output.txt
 )
