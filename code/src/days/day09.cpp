@@ -29,9 +29,15 @@ constinit int stretchSums[10] = {
     45, // 9
 };
 
-static inline int getStretchSum(int value, int start, int range)
+static inline uint64_t getStretchSum(
+    uint64_t value, uint64_t start, uint64_t range)
 {
-    return (stretchSums[range] + (start - 1) * range) * value;
+    if (!range) [[unlikely]]
+    {
+        return 0;
+    }
+
+    return (stretchSums[range - 1] + (start) * range) * value;
 }
 
 uint64_t Day09::calculatePart1()
@@ -59,7 +65,7 @@ uint64_t Day09::calculatePart1()
         int offset0 = offset;
         int offset1 = offset0 + l0;
 
-        int stretchSum0 = getStretchSum(value, offset, l0);
+        uint64_t stretchSum0 = getStretchSum(value, offset, l0);
         printFmt("Keep {} at (value {}, offset {}, length {}) -> {}\n",
             value, value, offset, l0, stretchSum0);
         sum += stretchSum0;
@@ -69,7 +75,7 @@ uint64_t Day09::calculatePart1()
         {
             if (spaceLeft >= leftToMove) // file can be moved completely
             {
-                int stretchSum1 = getStretchSum(vBack, offset1, leftToMove);
+                uint64_t stretchSum1 = getStretchSum(vBack, offset1, leftToMove);
                 printFmt("Move {} into (value {}, offset {}, length {}) -> {}\n",
                     iBack, vBack, offset1, leftToMove, stretchSum1);
                 sum += stretchSum1;
@@ -89,7 +95,7 @@ uint64_t Day09::calculatePart1()
             }
             else // File needs to be split up.
             {
-                int stretchSum1 = getStretchSum(vBack, offset1, spaceLeft);
+                uint64_t stretchSum1 = getStretchSum(vBack, offset1, spaceLeft);
                 printFmt("Fill {} into (value {}, offset {}, length {}) -> {}\n",
                     iBack, vBack, offset1, spaceLeft, stretchSum1);
                 sum += stretchSum1;
@@ -105,7 +111,7 @@ uint64_t Day09::calculatePart1()
 
     if (iFront == iBack)
     {
-        int stretchSumLeft = getStretchSum(vBack, offset, leftToMove);
+        uint64_t stretchSumLeft = getStretchSum(vBack, offset, leftToMove);
         printFmt("Count partial left {} into (value {}, offset {}, length {}) -> {}\n",
             iBack, vBack, offset, leftToMove, stretchSumLeft);
         sum += stretchSumLeft;
