@@ -44,6 +44,9 @@ target_sources(aoc_main
 target_link_libraries(aoc_main
     common
 )
+target_compile_options(aoc_main
+    PUBLIC "-Wall"
+)
 target_link_options(aoc_main
     PUBLIC "-Wl,--gc-sections"
 )
