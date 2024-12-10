@@ -7,6 +7,7 @@
 
 #include <array>
 #include <limits>
+#include <optional>
 #include <vector>
 
 class Day09 final
@@ -38,7 +39,7 @@ class Day09 final
 
     void initNextGaps();
     uint64_t allocate(int length, int end);
-    void advance(int required, int end);
+    void advance(int required, std::optional<SpaceOverride> override, int end);
 
 public:
     Day09();

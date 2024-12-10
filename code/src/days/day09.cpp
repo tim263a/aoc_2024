@@ -4,8 +4,6 @@
 #include <cstddef>
 
 #include <array>
-#include <iterator>
-#include <limits>
 #include <vector>
 
 #include "util/print_fmt.h"
@@ -134,7 +132,7 @@ void Day09::initNextGaps()
 
     for (std::size_t i = 0; i < m_buffer.size(); offset += m_buffer[i] - '0', i++)
     {
-        if (i % 2)
+        if (i % 2 == 0)
         {
             continue;
         }
@@ -148,7 +146,8 @@ void Day09::initNextGaps()
                 m_nextGaps[j] = {
                     .position = i,
                     .offset = offset,
-                    .length = length
+                    .length = length,
+                    .overrideIdx = (std::size_t) -1
                 };
 
                 printFmt("Registered gap {} @ {} {} {}\n", j, i, offset, length);
@@ -166,17 +165,16 @@ void Day09::initNextGaps()
 
 uint64_t Day09::allocate(int required, int origPosition)
 {
-    const CandidateSpace& gap = m_nextGaps[required];
+    CandidateSpace& gap = m_nextGaps[required];
     std::size_t position = gap.position;
-
-    printFmt("Found gap for {} @ {} {} {} \n",
-        required, gap.position, gap.offset, gap.length);
 
     if (position == -1 ||
         position >= origPosition)
     {
         // According to invariant, there is no gap that the file fits in.
         // Or the file would be after its original position, which prevents moves.
+
+        printFmt("No gap for {} @ {}\n", required, origPosition);
 
         // Caller must later add stretchsum, because offset is not yet known.
         return -1;
@@ -185,18 +183,21 @@ uint64_t Day09::allocate(int required, int origPosition)
         // return getStretchSum(value, origPosition, value);
     }
 
+    printFmt("Found gap for {} @ {} {} {} \n",
+        required, gap.position, gap.offset, gap.length);
+
     int length = gap.length;
     if (required == length)
     {
         printFmt("Allocate complete {}\n", gap.position);
-        advance(required, origPosition);
+        advance(required, std::nullopt, origPosition);
     }
     else
     {
         assert(required < length);
 
-        printFmt("Allocate {} out of {} @ {}\n",
-            required, gap.length, gap.position);
+        printFmt("Allocate {} out of {} @ {} {} {}\n",
+            required, length, gap.position, gap.offset, gap.length);
 
         // Suballocate and add/ammend space override.
         SpaceOverride override {
@@ -208,31 +209,49 @@ uint64_t Day09::allocate(int required, int origPosition)
         if (gap.overrideIdx == -1)
         {
             m_overrides.push_back(override);
+            gap.overrideIdx = m_overrides.size() - 1;
+
+            printFmt("Override {} @ {} with {} {} {}\n",
+                gap.overrideIdx, position,
+                override.position, override.offset, override.reducedLength);
         }
         else
         {
             // Handle case where gap was already pointing to override.
+            m_overrides[gap.overrideIdx] = override;
+
+            printFmt("Ammend override {} @ {} to {} {} {}\n",
+                gap.overrideIdx, position,
+                override.position, override.offset, override.reducedLength);
         }
 
         // TODO: Make nextGaps point to part after suballocation.
-        advance(length, origPosition);
+        advance(length, override, origPosition);
     }
 
     // TODO: Calculate the stretchsum that results from moving the file.
     return 0;
 }
 
-void Day09::advance(int required, int end)
+void Day09::advance(int required, std::optional<SpaceOverride> override, int end)
 {
     const CandidateSpace& gap = m_nextGaps[required];
 
     int minMovable = required;
-    for (int i = required; i > 0; i--)
+
+    if (!override)
     {
-        if (m_nextGaps[i].position == gap.position)
+        for (int i = required; i > 0; i--)
         {
-            minMovable = i;
+            if (m_nextGaps[i].position == gap.position)
+            {
+                minMovable = i;
+            }
         }
+    }
+    else
+    {
+        minMovable = override->reducedLength + 1;
     }
 
     printFmt("Min Movable {}\n", minMovable);
@@ -251,21 +270,25 @@ void Day09::advance(int required, int end)
 
     for (std::size_t i = gap.position + 1; i < m_buffer.size() && i < end; offset += m_buffer[i] - '0', i++)
     {
-        if (i % 2)
+        if (i % 2 == 0)
         {
             continue;
         }
 
         auto length = m_buffer[i] - '0';
+        std::size_t overrideIdx = -1;
 
         // Search override to potentially reduce length.
         // TODO: Improve loop by somehow making m_overrides sorted?
-        for (auto& override : m_overrides)
+        for (std::size_t j = 0; j < m_overrides.size(); j++)
         {
-            if (override.position == i)
+            auto& override = m_overrides[j];
+
+            if (override.position == j)
             {
                 length = override.reducedLength;
                 offset = override.offset;
+                overrideIdx = j;
                 break; // m_override should only have one entry per position.
             }
         }
@@ -277,7 +300,8 @@ void Day09::advance(int required, int end)
                 m_nextGaps[j] = {
                     .position = i,
                     .offset = offset,
-                    .length = length
+                    .length = length,
+                    .overrideIdx = overrideIdx
                 };
 
                 printFmt("Advance gap {} @ {} {} {}\n", j, i, offset, length);
@@ -290,6 +314,18 @@ void Day09::advance(int required, int end)
                 return;
             }
         }
+    }
+
+    for (std::size_t j = largestFound + 1; j <= originalGapLength; j++)
+    {
+        m_nextGaps[j] = {
+            .position = (std::size_t) -1,
+            .offset = -1,
+            .length = -1,
+            .overrideIdx = (std::size_t) -1
+        };
+
+        printFmt("No more gap for {} before end @ {}\n", j, end);
     }
 }
 
@@ -325,10 +361,10 @@ uint64_t Day09::calculatePart2()
         if (movedSum != -1)
         {
             // File got moved.
+            sum += movedSum;
         }
         else
         {
-            sum += movedSum;
             m_notMovedFor2.push_back(iBack);
         }
 
@@ -336,9 +372,11 @@ uint64_t Day09::calculatePart2()
         vBack -= 1;
     }
 
+    printFmt("Not moved ({}):\n", m_notMovedFor2.size());
     for (auto notMoved : m_notMovedFor2)
     {
         // TODO: Add stretchSums for all number after last applied move.
+        printFmt("{} -> {}\n", notMoved, 0);
     }
 
     return sum;
