@@ -3,8 +3,8 @@
 #include "days/day.h"
 
 #include <cstdint>
-#include <unordered_map>
-#include <unordered_set>
+
+#include <array>
 #include <vector>
 
 class Day09 final
@@ -12,7 +12,28 @@ class Day09 final
 {
     std::vector<uint8_t> m_buffer;
 
-    uint64_t m_part2 = 0;
+    // For Part 2
+
+    struct CandidateSpace
+    {
+        std::size_t position;
+        int offset;
+        int length;
+    };
+
+    struct SpaceOverride
+    {
+        std::size_t position;
+        int offset;
+        int reducedLength;
+    };
+
+    std::array<CandidateSpace, 10> m_nextGaps;
+    std::vector<SpaceOverride> m_overrides;
+
+    void initNextGaps();
+    void allocate(int length, int end);
+    void advance(int required, int end);
 
 public:
     Day09();
