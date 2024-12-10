@@ -164,54 +164,92 @@ void Day09::initNextGaps()
     }
 }
 
-void Day09::allocate(int required, int end)
+uint64_t Day09::allocate(int required, int origPosition)
 {
     const CandidateSpace& gap = m_nextGaps[required];
     std::size_t position = gap.position;
 
-    if (position == std::numeric_limits<std::size_t>::max())
+    printFmt("Found gap for {} @ {} {} {} \n",
+        required, gap.position, gap.offset, gap.length);
+
+    if (position == -1 ||
+        position >= origPosition)
     {
         // According to invariant, there is no gap that the file fits in.
+        // Or the file would be after its original position, which prevents moves.
 
-        // TODO: Add stretchsum for unmoved file - or have caller do it.
-        return;
+        // Caller must later add stretchsum, because offset is not yet known.
+        return -1;
+
+        // Return stretchsum for unmoved file.
+        // return getStretchSum(value, origPosition, value);
     }
 
     int length = gap.length;
     if (required == length)
     {
-        advance(required, end);
+        printFmt("Allocate complete {}\n", gap.position);
+        advance(required, origPosition);
     }
     else
     {
         assert(required < length);
 
-        // TODO: Handle case where gap was already pointing to override.
+        printFmt("Allocate {} out of {} @ {}\n",
+            required, gap.length, gap.position);
 
-        // Suballocate and add space override.
-        m_overrides.push_back({
+        // Suballocate and add/ammend space override.
+        SpaceOverride override {
             .position = position,
             .offset = gap.offset + required,
             .reducedLength = length - required,
-        });
+        };
 
-        // TODO: Make nextGaps p[oint to part after suballocation.
+        if (gap.overrideIdx == -1)
+        {
+            m_overrides.push_back(override);
+        }
+        else
+        {
+            // Handle case where gap was already pointing to override.
+        }
 
-        advance(length, end);
+        // TODO: Make nextGaps point to part after suballocation.
+        advance(length, origPosition);
     }
 
     // TODO: Calculate the stretchsum that results from moving the file.
+    return 0;
 }
 
 void Day09::advance(int required, int end)
 {
     const CandidateSpace& gap = m_nextGaps[required];
 
-    int largestFound = required;
+    int minMovable = required;
+    for (int i = required; i > 0; i--)
+    {
+        if (m_nextGaps[i].position == gap.position)
+        {
+            minMovable = i;
+        }
+    }
 
-    int offset = gap.offset;
+    printFmt("Min Movable {}\n", minMovable);
 
-    for (std::size_t i = gap.position + 2; i < m_buffer.size() && i < end; offset += m_buffer[i] - '0', i++)
+    int offset = gap.offset + gap.length;
+
+    // TODO: Consider that current gap might have been overriden.
+
+    // Note: Whatever happened, only gaps <= required must be adjusted,
+    // because other gaps wouldn't have fit modified gap anyway.
+    // Addendum: Incorrect, by override large gaps might have become small.
+    // Fixed note: Only gaps <= original gap length must be adjusted.
+    int originalGapLength = gap.length;
+
+    int largestFound = minMovable - 1;
+
+    for (std::size_t i = gap.position + 1; i < m_buffer.size() && i < end; offset += m_buffer[i] - '0', i++)
     {
         if (i % 2)
         {
@@ -220,7 +258,17 @@ void Day09::advance(int required, int end)
 
         auto length = m_buffer[i] - '0';
 
-        // TODO: Search override to potentially reduce length.
+        // Search override to potentially reduce length.
+        // TODO: Improve loop by somehow making m_overrides sorted?
+        for (auto& override : m_overrides)
+        {
+            if (override.position == i)
+            {
+                length = override.reducedLength;
+                offset = override.offset;
+                break; // m_override should only have one entry per position.
+            }
+        }
 
         if (length > largestFound)
         {
@@ -232,12 +280,12 @@ void Day09::advance(int required, int end)
                     .length = length
                 };
 
-                printFmt("Advanced gap {} @ {} {} {}\n", j, i, offset, length);
+                printFmt("Advance gap {} @ {} {} {}\n", j, i, offset, length);
             }
 
             largestFound = length;
 
-            if (largestFound == 9)
+            if (largestFound >= originalGapLength)
             {
                 return;
             }
@@ -253,90 +301,44 @@ uint64_t Day09::calculatePart2()
     printFmt("Buffer resized to {}\n", m_buffer.size());
 
     m_nextGaps.fill({
-        .position = std::numeric_limits<std::size_t>::max(),
+        .position = (std::size_t) -1,
         .offset = -1,
         .length = -1
     }); // Indicate that there are no such gaps yet.
     initNextGaps(); // Starts invariant the nextGaps point to next gaps.
-
-    return sum;
 
     // Reasonably adjust nextGaps;
     // TODO: Go from back to front, searching a space each time.
         // When finding something, update nextGaps.
     // TODO: Count unmoved files at end.
 
-    std::size_t iFront = 0;
-    std::size_t iBack = m_buffer.size() - 3; // TODO: Make sure this points to the last space.
+    std::size_t iBack = m_buffer.size() - 1;
 
     iBack -= (iBack) % 2; // Ensure iBack is even, i.e. it points to a file.
     int vBack = iBack / 2;
-    int leftToMove = m_buffer[iBack] - '0'; // length left of file to move
 
-    printFmt("Front: {} -> {:c}\n", iFront, m_buffer[iFront]);
     printFmt("Back: {} -> {:c} (value {})\n", iBack, m_buffer[iBack], vBack);
 
-    int value = 0; // File index of current file.
-    int offset = 0; // Sum of lengths so far.
-
-    for (; iFront < iBack; iFront += 2, value++)
+    while (iBack > m_nextGaps[1].position)
     {
-        int l0 = m_buffer[iFront] - '0'; // file length
-        int l1 = m_buffer[iFront + 1] - '0'; // space length
-
-        int offset0 = offset;
-        int offset1 = offset0 + l0;
-
-        uint64_t stretchSum0 = getStretchSum(value, offset, l0);
-        printFmt("Keep {} at (value {}, offset {}, length {}) -> {}\n",
-            value, value, offset, l0, stretchSum0);
-        sum += stretchSum0;
-
-        int spaceLeft = l1;
-        while (spaceLeft > 0)
+        uint64_t movedSum = allocate(m_buffer[iBack] - '0', iBack);
+        if (movedSum != -1)
         {
-            if (spaceLeft >= leftToMove) // file can be moved completely
-            {
-                uint64_t stretchSum1 = getStretchSum(vBack, offset1, leftToMove);
-                printFmt("Move {} into (value {}, offset {}, length {}) -> {}\n",
-                    iBack, vBack, offset1, leftToMove, stretchSum1);
-                sum += stretchSum1;
-
-                offset1 += leftToMove;
-                spaceLeft -= leftToMove;
-
-                // Select next file to move.
-                iBack -= 2;
-                vBack -= 1;
-                leftToMove = m_buffer[iBack] - '0';
-
-                if (iFront >= iBack)
-                {
-                    break;
-                }
-            }
-            else // File needs to be split up.
-            {
-                uint64_t stretchSum1 = getStretchSum(vBack, offset1, spaceLeft);
-                printFmt("Fill {} into (value {}, offset {}, length {}) -> {}\n",
-                    iBack, vBack, offset1, spaceLeft, stretchSum1);
-                sum += stretchSum1;
-
-                // Keep same file to move.
-                leftToMove -= spaceLeft;
-                break;
-            }
+            // File got moved.
+        }
+        else
+        {
+            sum += movedSum;
+            m_notMovedFor2.push_back(iBack);
         }
 
-        offset += l0 + l1;
+        iBack -= 2;
+        vBack -= 1;
     }
 
-    if (iFront == iBack)
+    for (auto notMoved : m_notMovedFor2)
     {
-        uint64_t stretchSumLeft = getStretchSum(vBack, offset, leftToMove);
-        printFmt("Count partial left {} into (value {}, offset {}, length {}) -> {}\n",
-            iBack, vBack, offset, leftToMove, stretchSumLeft);
-        sum += stretchSumLeft;
+        // TODO: Add stretchSums for all number after last applied move.
     }
 
     return sum;
