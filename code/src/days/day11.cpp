@@ -2,6 +2,9 @@
 
 #include "util/print_fmt.h"
 #include "util/read_input.h"
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
 #include <sstream>
 
 Day11::Day11()
@@ -98,9 +101,73 @@ uint64_t Day11::calculatePart1()
     return sum;
 }
 
+void Day11::cache(uint64_t value, int64_t cyclesLeft, uint64_t result)
+{
+    if (value < 1000)
+    {
+        return;
+    }
+
+    auto vec = m_lengthMap[value];
+    vec.resize(cyclesLeft, std::max<std::size_t>(cyclesLeft, vec.size()));
+    vec[cyclesLeft - 1] = result;
+}
+
+uint64_t Day11::findResultLength(uint64_t value, int64_t cyclesLeft)
+{
+    if (cyclesLeft <= 0)
+    {
+        return 1;
+    }
+
+    if (value == 0)
+    {
+        return findResultLength(1, cyclesLeft - 1);
+    }
+
+    if (value < 1000)
+    {
+        auto mapping = m_lengthMap.find(value);
+        if (mapping != m_lengthMap.end() &&
+            mapping->second.size() >= cyclesLeft)
+        {
+            uint64_t hashed = mapping->second[cyclesLeft];
+            if (hashed)
+            {
+                return hashed;
+            }
+        }
+    }
+
+    uint64_t left = 0;
+    uint64_t right = 0;
+
+    assert(value != 0);
+
+    if (splitEven(value, left, right))
+    {
+        uint64_t resLeft = findResultLength(left, cyclesLeft - 1);
+        cache(left, cyclesLeft, resLeft);
+
+        uint64_t resRight = findResultLength(right, cyclesLeft - 1);
+        cache(right, cyclesLeft, resRight);
+
+        return resLeft + resRight;
+    }
+    else
+    {
+        return findResultLength(2024 * value, cyclesLeft - 1);
+    }
+}
+
 uint64_t Day11::calculatePart2()
 {
     uint64_t sum = 0;
+
+    for (uint64_t number : m_inputNumbers)
+    {
+        sum += findResultLength(number, 25);
+    }
 
     return sum;
 }
