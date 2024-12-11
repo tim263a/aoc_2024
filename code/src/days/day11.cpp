@@ -103,7 +103,7 @@ uint64_t Day11::calculatePart1()
 
 void Day11::cache(uint64_t value, int64_t cyclesLeft, uint64_t result)
 {
-    if (value < 1000)
+    if (value < 10000)
     {
         return;
     }
@@ -112,6 +112,9 @@ void Day11::cache(uint64_t value, int64_t cyclesLeft, uint64_t result)
     vec.resize(cyclesLeft, std::max<std::size_t>(cyclesLeft, vec.size()));
     vec[cyclesLeft - 1] = result;
 }
+
+static uint64_t requests = 0;
+static uint64_t found = 0;
 
 uint64_t Day11::findResultLength(uint64_t value, int64_t cyclesLeft)
 {
@@ -127,6 +130,13 @@ uint64_t Day11::findResultLength(uint64_t value, int64_t cyclesLeft)
 
     if (value < 1000)
     {
+        requests += 1;
+
+        if (requests % 1000)
+        {
+            printFmt("Hit rate {}/{}\n", found, requests);
+        }
+
         auto mapping = m_lengthMap.find(value);
         if (mapping != m_lengthMap.end() &&
             mapping->second.size() >= cyclesLeft)
@@ -134,6 +144,7 @@ uint64_t Day11::findResultLength(uint64_t value, int64_t cyclesLeft)
             uint64_t hashed = mapping->second[cyclesLeft];
             if (hashed)
             {
+                found += 1;
                 return hashed;
             }
         }
