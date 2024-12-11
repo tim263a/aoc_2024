@@ -38,7 +38,7 @@ class Day09 final
     std::vector<std::size_t> m_notMovedFor2;
 
     void initNextGaps();
-    uint64_t allocate(int length, int end);
+    uint64_t allocate(int value, int length, int end);
     void advance(int required, std::optional<SpaceOverride> override, int end);
 
 public:

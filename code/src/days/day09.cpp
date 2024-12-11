@@ -163,7 +163,7 @@ void Day09::initNextGaps()
     }
 }
 
-uint64_t Day09::allocate(int required, int origPosition)
+uint64_t Day09::allocate(int value, int required, int origPosition)
 {
     CandidateSpace& gap = m_nextGaps[required];
     std::size_t position = gap.position;
@@ -191,6 +191,8 @@ uint64_t Day09::allocate(int required, int origPosition)
     {
         printFmt("Allocate complete {}\n", gap.position);
         advance(required, std::nullopt, origPosition);
+
+        return getStretchSum(value, gap.offset, length);
     }
     else
     {
@@ -357,20 +359,24 @@ uint64_t Day09::calculatePart2()
 
     while (iBack > m_nextGaps[1].position)
     {
-        uint64_t movedSum = allocate(m_buffer[iBack] - '0', iBack);
+        uint64_t movedSum = allocate(vBack, m_buffer[iBack] - '0', iBack);
         if (movedSum != -1)
         {
             // File got moved.
+            printFmt("Moved sum for {}: {}\n", vBack, movedSum);
             sum += movedSum;
         }
         else
         {
+            printFmt("Not moving {} @ {}\n", vBack, iBack);
             m_notMovedFor2.push_back(iBack);
         }
 
         iBack -= 2;
         vBack -= 1;
     }
+
+    printFmt("Not moving all before {} @ {}\n", vBack, iBack);
 
     printFmt("Not moved ({}):\n", m_notMovedFor2.size());
     for (auto notMoved : m_notMovedFor2)
