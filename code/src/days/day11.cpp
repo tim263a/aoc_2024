@@ -2,10 +2,12 @@
 
 #include "util/print_fmt.h"
 #include "util/read_input.h"
+
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
+#include <optional>
 #include <sstream>
+#include <unistd.h>
 
 Day11::Day11()
     : m_buffer(100)
@@ -101,22 +103,33 @@ uint64_t Day11::calculatePart1()
     return sum;
 }
 
-void Day11::cache(uint64_t value, int64_t cyclesLeft, uint64_t result)
+void Day11::cache(
+    uint64_t value, int64_t cyclesLeft, int64_t result, uint64_t maxCycles)
 {
-    if (value < 10000)
+    if (value > 1000)
     {
         return;
     }
 
-    auto vec = m_lengthMap[value];
-    vec.resize(cyclesLeft, std::max<std::size_t>(cyclesLeft, vec.size()));
-    vec[cyclesLeft - 1] = result;
+    m_cache[value * maxCycles + cyclesLeft] = result;
+}
+
+std::optional<uint64_t> Day11::queryCache(
+    uint64_t value, int64_t cyclesLeft, int64_t maxCycles)
+{
+    auto entry = m_cache.find(value * maxCycles + cyclesLeft);
+    if (entry == m_cache.end())
+    {
+        return std::nullopt;
+    }
+    return entry->second;
 }
 
 static uint64_t requests = 0;
 static uint64_t found = 0;
 
-uint64_t Day11::findResultLength(uint64_t value, int64_t cyclesLeft)
+uint64_t Day11::findResultLength(
+    uint64_t value, int64_t cyclesLeft, uint64_t maxCycles)
 {
     if (cyclesLeft <= 0)
     {
@@ -125,28 +138,23 @@ uint64_t Day11::findResultLength(uint64_t value, int64_t cyclesLeft)
 
     if (value == 0)
     {
-        return findResultLength(1, cyclesLeft - 1);
+        return findResultLength(1, cyclesLeft - 1, maxCycles);
     }
 
     if (value < 1000)
     {
         requests += 1;
 
-        if (requests % 1000)
+        if (requests % 1000 == 0)
         {
-            printFmt("Hit rate {}/{}\n", found, requests);
+            printFmt("Hit rate {:4d}/{:4d}\n", found, requests);
         }
 
-        auto mapping = m_lengthMap.find(value);
-        if (mapping != m_lengthMap.end() &&
-            mapping->second.size() >= cyclesLeft)
+        std::optional<uint64_t> cacheResult = queryCache(value, cyclesLeft, maxCycles);
+        if (cacheResult)
         {
-            uint64_t hashed = mapping->second[cyclesLeft];
-            if (hashed)
-            {
-                found += 1;
-                return hashed;
-            }
+            found += 1;
+            return *cacheResult;
         }
     }
 
@@ -157,17 +165,19 @@ uint64_t Day11::findResultLength(uint64_t value, int64_t cyclesLeft)
 
     if (splitEven(value, left, right))
     {
-        uint64_t resLeft = findResultLength(left, cyclesLeft - 1);
-        cache(left, cyclesLeft, resLeft);
+        uint64_t resLeft = findResultLength(left, cyclesLeft - 1, maxCycles);
+        cache(left, cyclesLeft - 1, resLeft, maxCycles);
 
-        uint64_t resRight = findResultLength(right, cyclesLeft - 1);
-        cache(right, cyclesLeft, resRight);
+        uint64_t resRight = findResultLength(right, cyclesLeft - 1, maxCycles);
+        cache(right, cyclesLeft - 1, resRight, maxCycles);
 
         return resLeft + resRight;
     }
     else
     {
-        return findResultLength(2024 * value, cyclesLeft - 1);
+        uint64_t res = findResultLength(2024 * value, cyclesLeft - 1, maxCycles);
+        cache(2024 * value, cyclesLeft - 1, res, maxCycles);
+        return res;
     }
 }
 
@@ -177,7 +187,7 @@ uint64_t Day11::calculatePart2()
 
     for (uint64_t number : m_inputNumbers)
     {
-        sum += findResultLength(number, 25);
+        sum += findResultLength(number, 75, 76);
     }
 
     return sum;

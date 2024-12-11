@@ -4,6 +4,7 @@
 
 #include <cstdint>
 
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -14,10 +15,12 @@ class Day11 final
 
     std::vector<uint64_t> m_inputNumbers;
 
-    std::unordered_map<uint64_t, std::vector<uint64_t>> m_lengthMap;
+    std::unordered_map<uint64_t, uint64_t> m_cache;
 
-    uint64_t findResultLength(uint64_t value, int64_t cyclesLeft);
-    void cache(uint64_t value, int64_t cyclesLeft, uint64_t result);
+    uint64_t findResultLength(uint64_t value, int64_t cyclesLeft, uint64_t maxCycles);
+
+    void cache(uint64_t value, int64_t cyclesLeft, int64_t maxCycles, uint64_t result);
+    std::optional<uint64_t> queryCache(uint64_t value, int64_t cyclesLeft, int64_t maxCycles);
 
 public:
     Day11();
