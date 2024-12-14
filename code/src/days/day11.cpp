@@ -106,7 +106,7 @@ uint64_t Day11::calculatePart1()
 void Day11::cache(
     uint64_t value, int64_t cyclesLeft, int64_t result, uint64_t maxCycles)
 {
-    if (value > 1000)
+    if (value > 2024)
     {
         return;
     }
@@ -141,7 +141,7 @@ uint64_t Day11::findResultLength(
         return findResultLength(1, cyclesLeft - 1, maxCycles);
     }
 
-    if (value < 1000)
+    if (value < 2024)
     {
         requests += 1;
 
