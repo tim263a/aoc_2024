@@ -198,7 +198,7 @@ uint64_t Day14::calculatePart2()
 
         candidates++;
 
-#if 0
+#if 1
         for (uint64_t y = 0; y < HEIGHT; y++)
         {
             for (uint64_t x = 0; x < WIDTH; x++)

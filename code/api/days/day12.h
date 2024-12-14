@@ -4,9 +4,12 @@
 
 #include <cstdint>
 
+#include <vector>
+
 class Day12 final
     : public Day
 {
+    std::vector<uint8_t> m_buffer;
 
 public:
     Day12();
