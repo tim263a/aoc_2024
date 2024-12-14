@@ -2,9 +2,16 @@
 
 #include "util/print_fmt.h"
 #include "util/read_input.h"
+#include <algorithm>
 #include <array>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
+#include <memory>
+#include <thread>
+#include <unordered_set>
+#include <utility>
 
 Day14::Day14()
     : m_buffer(16 * 1024)
@@ -63,8 +70,6 @@ static inline int64_t positiveModulo(int i, int n) {
     return (i % n + n) % n;
 }
 
-uint64_t Day14::calculatePart1()
-{
 #if 1 // Real data
     static constinit int64_t WIDTH = 101;
     static constinit int64_t HEIGHT = 103;
@@ -81,6 +86,8 @@ uint64_t Day14::calculatePart1()
     static constinit int64_t HALF_HEIGHT = 3;
 #endif
 
+uint64_t Day14::calculatePart1()
+{
     uint64_t sum = 0;
 
     std::array<uint64_t, 4> quadrants = {};
@@ -90,7 +97,7 @@ uint64_t Day14::calculatePart1()
         int64_t tX = positiveModulo((p.x0 + STEPS * p.dX), WIDTH) - HALF_WIDTH;
         int64_t tY = positiveModulo((p.y0 + STEPS * p.dY), HEIGHT) - HALF_HEIGHT;
 
-        printFmt("{} {} {} {} --> {} {}\n", p.x0, p.y0, p.dX, p.dY, tX, tY);
+        DEBUG_FMT("{} {} {} {} --> {} {}\n", p.x0, p.y0, p.dX, p.dY, tX, tY);
 
         if (tX == 0 || tY == 0)
         {
@@ -98,7 +105,7 @@ uint64_t Day14::calculatePart1()
         }
 
         std::size_t quadrant = 2 * (tX > 0) + (tY > 0);
-        printFmt("--> Quadrant {}\n", quadrant);
+        DEBUG_FMT("--> Quadrant {}\n", quadrant);
         quadrants[quadrant] += 1;
     }
 
@@ -113,7 +120,111 @@ uint64_t Day14::calculatePart1()
 
 uint64_t Day14::calculatePart2()
 {
-    uint64_t sum = 0;
+    struct Position
+    {
+        uint64_t x;
+        uint64_t y;
+    };
 
-    return sum;
+    std::vector<Position> positions;
+
+    uint64_t candidates = 0;
+
+    int64_t minOrthoX = 2024;
+    int64_t minOrthoY = 2024;
+
+    int64_t bestIdx = 0;
+
+    for (int64_t steps = 0; steps < 10000 || !bestIdx; positions.clear(), steps++)
+    {
+        int64_t outliersX = 0;
+        int64_t outliersY = 0;
+        
+        fflush(stdout);
+
+        static constinit int64_t THRESHOLD_X = 30;
+        static constinit int64_t THRESHOLD_Y = 30;
+
+        static constinit int64_t RENDER_DISTANCE_X = 50;
+        static constinit int64_t RENDER_DISTANCE_Y = 100;
+
+        for (const Puzzle& p : m_puzzles)
+        {
+            int64_t tX = positiveModulo((p.x0 + steps * p.dX), WIDTH);
+            int64_t tY = positiveModulo((p.y0 + steps * p.dY), HEIGHT);
+
+            if (tX < THRESHOLD_X)
+            {
+                outliersX++;
+            }
+
+            if (tY < THRESHOLD_Y)
+            {
+                outliersY++;
+            }
+
+            positions.emplace_back(tX, tY);
+        }
+
+        if (outliersX > RENDER_DISTANCE_X && outliersY > RENDER_DISTANCE_Y)
+        {
+            continue;
+        }
+
+        bool isOrthoMinX = outliersX < RENDER_DISTANCE_X && outliersY < minOrthoX;
+        bool isOrthoMinY = outliersY < RENDER_DISTANCE_Y && outliersX < minOrthoY;
+
+        if (isOrthoMinX && isOrthoMinY)
+        {
+            bestIdx = steps;
+        }
+
+        if (!isOrthoMinX && !isOrthoMinY)
+        {
+            continue;
+        }
+
+        if (isOrthoMinX)
+        {
+            minOrthoX = outliersY;
+            printFmt("MinOrthoX: {}\n", minOrthoX);
+        }
+
+        if (isOrthoMinY)
+        {
+            minOrthoY = outliersX;
+            printFmt("MinOrthoY: {}\n", minOrthoY);
+        }
+
+        candidates++;
+
+#if 0
+        for (uint64_t y = 0; y < HEIGHT; y++)
+        {
+            for (uint64_t x = 0; x < WIDTH; x++)
+            {
+                if (std::find_if(positions.cbegin(), positions.cend(),
+                    [&] (const Position& p)
+                    {
+                        return p.x == x && p.y == y;
+                    }) != positions.cend())
+                {
+                    printFmt("{:c}", 'X');
+                }
+                else
+                {
+                    printFmt("{:c}", ' ');
+                }
+            }
+            printFmt("\n");
+        }
+#endif
+
+        printFmt("Above after {} steps, outliers {} {}\n",
+            steps, outliersX, outliersY);
+
+        // std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
+
+    return bestIdx;
 }
