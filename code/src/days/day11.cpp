@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cassert>
 #include <map>
+#include <memory>
 #include <optional>
 #include <sstream>
 #include <unistd.h>
@@ -62,18 +63,21 @@ uint64_t Day11::calculatePart1()
 {
     uint64_t sum = 0;
 
-    std::unordered_map<uint64_t, uint64_t> o0;
-    std::unordered_map<uint64_t, uint64_t> o1;
+    auto p0 = std::make_unique<std::unordered_map<uint64_t, uint64_t>>();
+    auto p1 = std::make_unique<std::unordered_map<uint64_t, uint64_t>>();
 
     for (uint64_t v : m_inputNumbers)
     {
-        o0[v] += 1;
+        (*p0)[v]++;
     }
 
     int64_t nExpansions = 0;
 
     for (int i = 0; i < 75; i++)
     {
+        auto& o0 = *p0;
+        auto& o1 = *p1;
+
         uint64_t sum = 0;
 
         for (auto e0 : o0)
@@ -127,8 +131,8 @@ uint64_t Day11::calculatePart1()
         printFmt("Iteration {}: {} ({} unique, {} expansions)\n",
             i, sum, o1.size(), nExpansions);
 
-        o0 = std::move(o1);
-        o1.clear();
+        std::swap(p0, p1);
+        p1->clear();
     }
 
     return m_part1;
