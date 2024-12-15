@@ -22,6 +22,7 @@
 #include "days/day12.h"
 #include "days/day13.h"
 #include "days/day14.h"
+#include "days/day15.h"
 
 bool g_verbose = false;
 
@@ -86,6 +87,9 @@ int main(int argc, char** argv)
             break;
         case 14:
             day = std::make_unique<Day14>();
+            break;
+        case 15:
+            day = std::make_unique<Day15>();
             break;
     }
 
