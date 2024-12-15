@@ -5,9 +5,11 @@
 
 #include <algorithm>
 #include <cassert>
+#include <map>
 #include <optional>
 #include <sstream>
 #include <unistd.h>
+#include <unordered_map>
 
 Day11::Day11()
     : m_buffer(100)
@@ -60,29 +62,58 @@ uint64_t Day11::calculatePart1()
 {
     uint64_t sum = 0;
 
-    std::vector<uint64_t> v0 = m_inputNumbers;
-    std::vector<uint64_t> v1;
+    std::unordered_map<uint64_t, uint64_t> o0;
+    std::unordered_map<uint64_t, uint64_t> o1;
 
-    for (int i = 0; i < 25; i++)
+    for (uint64_t v : m_inputNumbers)
     {
-        for (uint64_t v : v0)
+        o0[v] += 1;
+    }
+
+    int64_t nExpansions = 0;
+
+    for (int i = 0; i < 75; i++)
+    {
+        uint64_t sum = 0;
+
+        for (auto e0 : o0)
         {
-            uint64_t left = 0;
-            uint64_t right = 0;
+            nExpansions += 1;
+
+            auto v = e0.first;
+            auto multitude = e0.second;
+
+            sum += multitude;
 
             if (v == 0)
             {
-                v1.push_back(1);
+                o1[1] += multitude;
+                continue;
             }
-            else if (splitEven(v, left, right))
+
+            uint64_t left = 0;
+            uint64_t right = 0;
+
+            if (splitEven(v, left, right))
             {
-                v1.push_back(left);
-                v1.push_back(right);
+                o1[left] += multitude;
+                o1[right] += multitude;
+
+                sum += multitude;
             }
             else
             {
-                v1.push_back(2024 * v);
+                o1[2024 * v] += multitude;
             }
+        }
+
+        if (i == 24)
+        {
+            m_part1 = sum;
+        }
+        else if (i == 74)
+        {
+            m_part2 = sum;
         }
 
 #if 0
@@ -93,102 +124,17 @@ uint64_t Day11::calculatePart1()
         printFmt("\n");
 #endif
 
-        sum = v1.size();
-        printFmt("Iteration {}: {}\n", i, sum);
+        printFmt("Iteration {}: {} ({} unique, {} expansions)\n",
+            i, sum, o1.size(), nExpansions);
 
-        std::swap(v0, v1);
-        v1.clear();
+        o0 = std::move(o1);
+        o1.clear();
     }
 
-    return sum;
-}
-
-void Day11::cache(
-    uint64_t value, int64_t cyclesLeft, int64_t result, uint64_t maxCycles)
-{
-    if (value > 2024)
-    {
-        return;
-    }
-
-    m_cache[value * maxCycles + cyclesLeft] = result;
-}
-
-std::optional<uint64_t> Day11::queryCache(
-    uint64_t value, int64_t cyclesLeft, int64_t maxCycles)
-{
-    auto entry = m_cache.find(value * maxCycles + cyclesLeft);
-    if (entry == m_cache.end())
-    {
-        return std::nullopt;
-    }
-    return entry->second;
-}
-
-static uint64_t requests = 0;
-static uint64_t found = 0;
-
-uint64_t Day11::findResultLength(
-    uint64_t value, int64_t cyclesLeft, uint64_t maxCycles)
-{
-    if (cyclesLeft <= 0)
-    {
-        return 1;
-    }
-
-    if (value == 0)
-    {
-        return findResultLength(1, cyclesLeft - 1, maxCycles);
-    }
-
-    if (value < 2024)
-    {
-        requests += 1;
-
-        if (requests % 1000 == 0)
-        {
-            printFmt("Hit rate {:4d}/{:4d}\n", found, requests);
-        }
-
-        std::optional<uint64_t> cacheResult = queryCache(value, cyclesLeft, maxCycles);
-        if (cacheResult)
-        {
-            found += 1;
-            return *cacheResult;
-        }
-    }
-
-    uint64_t left = 0;
-    uint64_t right = 0;
-
-    assert(value != 0);
-
-    if (splitEven(value, left, right))
-    {
-        uint64_t resLeft = findResultLength(left, cyclesLeft - 1, maxCycles);
-        cache(left, cyclesLeft - 1, resLeft, maxCycles);
-
-        uint64_t resRight = findResultLength(right, cyclesLeft - 1, maxCycles);
-        cache(right, cyclesLeft - 1, resRight, maxCycles);
-
-        return resLeft + resRight;
-    }
-    else
-    {
-        uint64_t res = findResultLength(2024 * value, cyclesLeft - 1, maxCycles);
-        cache(2024 * value, cyclesLeft - 1, res, maxCycles);
-        return res;
-    }
+    return m_part1;
 }
 
 uint64_t Day11::calculatePart2()
 {
-    uint64_t sum = 0;
-
-    for (uint64_t number : m_inputNumbers)
-    {
-        sum += findResultLength(number, 75, 76);
-    }
-
-    return sum;
+    return m_part2;
 }
