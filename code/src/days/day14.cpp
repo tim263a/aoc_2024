@@ -1,17 +1,12 @@
 #include "days/day14.h"
 
-#include "util/print_fmt.h"
-#include "util/read_input.h"
-#include <algorithm>
 #include <array>
-#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
-#include <memory>
-#include <thread>
-#include <unordered_set>
-#include <utility>
+
+#include "util/print_fmt.h"
+#include "util/read_input.h"
 
 Day14::Day14()
     : m_buffer(16 * 1024)
@@ -66,7 +61,7 @@ void Day14::parseInput()
     }
 }
 
-static inline int64_t positiveModulo(int i, int n) {
+static inline constexpr int64_t positiveModulo(int i, int n) {
     return (i % n + n) % n;
 }
 
@@ -126,7 +121,7 @@ uint64_t Day14::calculatePart2()
         uint64_t y;
     };
 
-    std::vector<Position> positions;
+    // std::vector<Position> positions;
 
     uint64_t candidates = 0;
 
@@ -135,36 +130,61 @@ uint64_t Day14::calculatePart2()
 
     int64_t bestIdx = 0;
 
-    for (int64_t steps = 0; steps < 10000 || !bestIdx; positions.clear(), steps++)
+    for (int64_t steps = 0; steps < 10000 || !bestIdx; /* positions.clear(), */ steps++)
     {
         int64_t outliersX = 0;
         int64_t outliersY = 0;
-        
-        fflush(stdout);
 
         static constinit int64_t THRESHOLD_X = 30;
         static constinit int64_t THRESHOLD_Y = 30;
 
-        static constinit int64_t RENDER_DISTANCE_X = 50;
+        static constinit int64_t RENDER_DISTANCE_X = 100;
         static constinit int64_t RENDER_DISTANCE_Y = 100;
+
+#if 0
+        bool skip = false; // Actually makes things slower.
+#endif
 
         for (const Puzzle& p : m_puzzles)
         {
-            int64_t tX = positiveModulo((p.x0 + steps * p.dX), WIDTH);
-            int64_t tY = positiveModulo((p.y0 + steps * p.dY), HEIGHT);
+            int64_t tX = positiveModulo(p.x0 + steps * p.dX, WIDTH);
+            int64_t tY = positiveModulo(p.y0 + steps * p.dY, HEIGHT);
 
             if (tX < THRESHOLD_X)
             {
                 outliersX++;
+
+#if 0
+                if (outliersX > minOrthoY)
+                {
+                    skip = true;
+                    break;
+                }
+#endif
             }
 
             if (tY < THRESHOLD_Y)
             {
                 outliersY++;
+
+#if 0
+                if (outliersY > minOrthoX)
+                {
+                    skip = true;
+                    break;
+                }
+#endif
             }
 
-            positions.emplace_back(tX, tY);
+            // positions.emplace_back(tX, tY);
         }
+
+#if 0
+        if (skip)
+        {
+            continue;
+        }
+#endif
 
         if (outliersX > RENDER_DISTANCE_X && outliersY > RENDER_DISTANCE_Y)
         {
@@ -177,6 +197,7 @@ uint64_t Day14::calculatePart2()
         if (isOrthoMinX && isOrthoMinY)
         {
             bestIdx = steps;
+            break;
         }
 
         if (!isOrthoMinX && !isOrthoMinY)
@@ -198,7 +219,7 @@ uint64_t Day14::calculatePart2()
 
         candidates++;
 
-#if 1
+#if 0
         for (uint64_t y = 0; y < HEIGHT; y++)
         {
             for (uint64_t x = 0; x < WIDTH; x++)
