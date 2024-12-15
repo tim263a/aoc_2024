@@ -32,31 +32,23 @@ void Day11::parseInput()
 
 static bool splitEven(uint64_t v, uint64_t& left, uint64_t& right)
 {
-    uint64_t numberLength = 0;
-    for (uint64_t shifted = 1; v >= shifted; numberLength++, shifted *= 10) { }
+    uint64_t fullShift = 1;
+    uint64_t halfShift = 1;
+    bool isOdd = false;
 
-    DEBUG_FMT("NumberLength {}: {}\n", v, numberLength);
-
-    if (numberLength % 2)
+    while (fullShift <= v)
     {
-        return false;
+        fullShift *= 10;
+        halfShift *= isOdd ? 1 : 10;
+        isOdd = !isOdd;
+
+        DEBUG_FMT("full {} half {}\n", fullShift, halfShift);
     }
 
-    left = v;
-    right = 0;
+    left = v / halfShift;
+    right = v - left * halfShift;
 
-    uint64_t rightShift = 1;
-
-    for (uint64_t i = 0; i < numberLength / 2; i++)
-    {
-        right += (left % 10) * rightShift;
-        rightShift *= 10;
-        left /= 10;
-    }
-
-    DEBUG_FMT("Split {} -> {} {}\n", v, left, right);
-
-    return true;
+    return !isOdd;
 }
 
 uint64_t Day11::calculatePart1()
@@ -126,7 +118,7 @@ uint64_t Day11::calculatePart1()
         printFmt("\n");
 #endif
 
-        printFmt("Iteration {}: {} ({} unique, {} expansions)\n",
+        DEBUG_FMT("Iteration {}: {} ({} unique, {} expansions)\n",
             i, sum, o1.size(), nExpansions);
 
         std::swap(p0, p1);
