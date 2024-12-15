@@ -61,8 +61,6 @@ static bool splitEven(uint64_t v, uint64_t& left, uint64_t& right)
 
 uint64_t Day11::calculatePart1()
 {
-    uint64_t sum = 0;
-
     auto p0 = std::make_unique<std::unordered_map<uint64_t, uint64_t>>();
     auto p1 = std::make_unique<std::unordered_map<uint64_t, uint64_t>>();
 
@@ -84,8 +82,8 @@ uint64_t Day11::calculatePart1()
         {
             nExpansions += 1;
 
-            auto v = e0.first;
-            auto multitude = e0.second;
+            const auto v = e0.first;
+            const auto multitude = e0.second;
 
             sum += multitude;
 
@@ -121,9 +119,9 @@ uint64_t Day11::calculatePart1()
         }
 
 #if 0
-        for (uint64_t v : v1)
+        for (auto e1 : o1)
         {
-            printFmt("{} ", v);
+            printFmt("{} ", e1.first);
         }
         printFmt("\n");
 #endif
@@ -133,6 +131,8 @@ uint64_t Day11::calculatePart1()
 
         std::swap(p0, p1);
         p1->clear();
+
+        p1->rehash(p0->bucket_count());
     }
 
     return m_part1;
