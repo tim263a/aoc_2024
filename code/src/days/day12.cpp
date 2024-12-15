@@ -3,9 +3,12 @@
 #include "util/print_fmt.h"
 #include "util/read_input.h"
 #include <cstddef>
+#include <cstdint>
 
 Day12::Day12()
     : m_buffer(32000)
+    , m_width(0)
+    , m_height(0)
 {
 
 }
@@ -13,67 +16,43 @@ Day12::Day12()
 void Day12::parseInput()
 {
     read_stdio_into_buffer(m_buffer);
+
+    for (auto it = m_buffer.cbegin(); *it != '\n'; it++, m_width++) { }
+    m_height = m_buffer.size() / (m_width + 1); // consider '\n'
+
+    printFmt("Map width {} height {}\n", m_width, m_height);
 }
 
 uint64_t Day12::calculatePart1()
 {
     uint64_t sum = 0;
 
-    struct Plot
+    struct CellState
     {
-        int64_t area = 0;
-        int64_t perimeter = 0;
-
-        std::size_t mergedInto = 0; // 0 means not merged.
+        uint64_t index;
+        uint64_t lowlink;
+        bool onStack;
     };
 
-    struct Stretch
+    uint64_t nextIndex = 1;
+
+    std::vector<CellState> cellStates(m_width * m_height, {{}});
+
+    for (std::size_t y = 0; y < m_height; y++)
     {
-        int64_t start;
-        int64_t end;
-
-        uint8_t charType;
-        std::size_t plotIdx;
-    };
-
-    std::vector<Plot> plots;
-
-    std::vector<Stretch> prevLine;
-    std::vector<Stretch> line;
-
-    Stretch stretch {};
-
-    for (auto it = m_buffer.cbegin(); it != m_buffer.cend(); it++)
-    {
-        if (*it == '\n')
+        for (std::size_t x = 0; x < m_height; x++)
         {
-            // TODO: Add up all plots that do not have current representation.
+            std::size_t bufferIdx = y * (m_width + 1) + x; // with '\n'
+            std::size_t stateIdx = y * m_width + x; // without '\n'
 
-            prevLine = std::move(line);
-            line.clear();
+            uint8_t c = m_buffer[bufferIdx];
+            CellState& v = cellStates[stateIdx];
 
-            if (it[1] == '\n')
+            if (!v.index)
             {
-                break;
+                // connect()
             }
-
-            stretch = {
-                .start = 0,
-                .end = 0,
-                .charType = it[1],
-                .plotIdx = 0
-            };
         }
-
-        if (*it != stretch.charType)
-        {
-            // Handle stop of current stretch.
-            // Create new stretch.
-        }
-
-        // Check whether current charType matches the one from previous line.
-
-
     }
 
     return sum;
