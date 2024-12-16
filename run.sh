@@ -11,7 +11,7 @@ fi
     cd build
 
     cmake -GNinja \
-        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         -DDAY_IDX=$day_idx \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
         ../code
@@ -69,9 +69,12 @@ echo ""
     echo "Using file $file_path as input."
 
     echo "$file_content" > hyperfine_input.txt
-    rm -rf hyperfile_output.txt
+    rm -rf hyperfine_output.txt
+
+    # time cat ./hyperfine_input.txt | ./aoc_main "$1"
 
     hyperfine --input ./hyperfine_input.txt --output ./hyperfine_output.txt --ignore-failure -- "./aoc_main $1"
+    cat ./hyperfine_input.txt | valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes ./aoc_main "$1"
 
     tail -n 100 hyperfine_output.txt
 )
