@@ -53,8 +53,9 @@ static bool splitEven(uint64_t v, uint64_t& left, uint64_t& right)
 
 uint64_t Day11::calculatePart1()
 {
-    auto p0 = std::make_unique<std::unordered_map<uint64_t, uint64_t>>();
-    auto p1 = std::make_unique<std::unordered_map<uint64_t, uint64_t>>();
+    // Allocate enough buckets so that map shouldn't be forced to create linked list.
+    auto p0 = std::make_unique<std::unordered_map<uint64_t, uint64_t>>(16000);
+    auto p1 = std::make_unique<std::unordered_map<uint64_t, uint64_t>>(16000);
 
     for (uint64_t v : m_inputNumbers)
     {
@@ -124,7 +125,7 @@ uint64_t Day11::calculatePart1()
         std::swap(p0, p1);
         p1->clear();
 
-        p1->rehash(p0->bucket_count());
+        // p1->rehash(16000);
     }
 
     return m_part1;
