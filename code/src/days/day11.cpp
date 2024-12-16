@@ -1,16 +1,16 @@
 #include "days/day11.h"
 
-#include "util/print_fmt.h"
-#include "util/read_input.h"
+#include <cassert>
 
 #include <algorithm>
-#include <cassert>
-#include <map>
 #include <memory>
-#include <optional>
 #include <sstream>
-#include <unistd.h>
 #include <unordered_map>
+
+#include <unistd.h>
+
+#include "util/print_fmt.h"
+#include "util/read_input.h"
 
 Day11::Day11()
     : m_buffer(100)
