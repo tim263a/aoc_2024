@@ -29,11 +29,11 @@ bool g_verbose = false;
 
 int main(int argc, char** argv)
 {
-#ifdef NDEBUG
+#ifndef NDEBUG
     auto start = std::chrono::high_resolution_clock::now();
 #endif
 
-#ifdef NDEBUG
+#ifndef NDEBUG
     uint32_t dayIdx = argc >= 2 ? std::stoi(argv[1]) : DAY_IDX;
     g_verbose = argc >= 3 && (argv[2] == std::string("1"));
 #else
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
 
     printf("%lu %lu\n", part1, part2);
 
-#ifdef NDEBUG
+#ifndef NDEBUG
     auto end = std::chrono::high_resolution_clock::now();
     printFmt("{}", end - start);
 #endif

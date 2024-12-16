@@ -21,7 +21,7 @@ void debugFmt(std::format_string<Args...> format, Args... args)
     }
 }
 
-#if NDEBUG
+#ifndef NDEBUG
     #define DEBUG_FMT(...) \
         if (g_verbose) debugFmt(__VA_ARGS__)
 #else
