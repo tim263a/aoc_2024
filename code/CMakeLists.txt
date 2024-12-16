@@ -45,6 +45,7 @@ target_sources(aoc_main
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/days/day13.cpp
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/days/day14.cpp
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/days/day15.cpp
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/days/day16.cpp
 )
 target_link_libraries(aoc_main
     common
