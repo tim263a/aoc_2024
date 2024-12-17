@@ -136,14 +136,14 @@ uint64_t Day17::calculatePart1()
                 // bdv instruction works exactly like the adv instruction except that the result is stored in the B register.
                 // (The numerator is still read from the A register.)
 
-                m_regB >>= getComboOperand(operand);
+                m_regB = m_regA >> getComboOperand(operand);
                 ip += 2;
             break;
             case 7:
                 // cdv instruction works exactly like the adv instruction except that the result is stored in the C register.
                 // (The numerator is still read from the A register.)
 
-                m_regC >>= getComboOperand(operand);
+                m_regC = m_regA >> getComboOperand(operand);
                 ip += 2;
             break;
             default:
