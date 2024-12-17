@@ -55,6 +55,7 @@ target_compile_options(aoc_main
 )
 target_link_options(aoc_main
     PUBLIC "-Wl,--gc-sections"
+    PUBLIC "-static"
 )
 
 # Test main target for catch_discover_tests
