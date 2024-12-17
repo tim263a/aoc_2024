@@ -186,29 +186,61 @@ uint64_t Day17::calculatePart2()
 
     constexpr uint64_t ITERATIONS = 0b1'000'000'000'000'000ULL;
 
-    std::array<uint64_t, 2> achievedLengths {};
+    std::array<uint64_t, 8> achievedLengths {};
+    std::array<uint64_t, 8> maxAchieved {};
+
+    std::vector<std::vector<uint64_t>> suffixCandidates;
+    std::vector<std::size_t> suffixIndices;
 
     uint64_t prefix = 0;
     uint64_t suffix = 0;
 
     uint64_t suffixScale = 1; // 2^(#bits in suffix)
 
-    uint64_t maxAchieved = 0;
+    auto incrementSuffixIndices = [&] ()
+    {
+        uint64_t keep = 0;
+
+        for (uint8_t i = 0; i < suffixIndices.size(); i++)
+        {
+            suffixIndices[i] += 0;
+
+            if (suffixIndices[i] >= suffixCandidates[i].size())
+            {
+                suffixIndices[i] = 0;
+                keep = 1;
+            }
+        }
+
+        return !keep;
+    };
 
     while (true)
     {
-        if (prefix >= ITERATIONS)
+        if (prefix >= ITERATIONS && !incrementSuffixIndices())
         {
-            for (std::size_t i = 0; i < achievedLengths.size(); i++)
+            if (!incrementSuffixIndices())
             {
-                printFmt("Achieved {} with {} scale {} (max {})\n",
-                    achievedLengths[i], i, suffixScale, maxAchieved);
+                std::vector<uint64_t> possibleSuffixes;
+
+                for (std::size_t i = 0; i < achievedLengths.size(); i++)
+                {
+                    printFmt("Achieved {} with {} scale {} (max {})\n",
+                        achievedLengths[i], i, suffixScale, maxAchieved[i]);
+
+                    if (achievedLengths[i])
+                    {
+                        possibleSuffixes.push_back(i);
+                    }
+                }
+
+                printFmt("Possible suffixes [{}]: ", suffixCandidates.size());
+                for (auto possibleSuffix : possibleSuffixes)
+                {
+                    printFmt("{} ", possibleSuffix);
+                }
+                printFmt("\n");
             }
-
-            uint64_t bestChoice = achievedLengths[0] > achievedLengths[1] ? 0 : 1;
-            suffix += suffixScale * bestChoice;
-
-            printFmt("Suffix: {:0b}\n", suffix);
 
             prefix = 0;
             suffixScale *= 2;
@@ -219,6 +251,7 @@ uint64_t Day17::calculatePart2()
             }
 
             candidateA = suffix;
+            std::exit(1);
         }
 
         if (ip >= m_opCodes.size() ||
@@ -313,13 +346,15 @@ uint64_t Day17::calculatePart2()
                     printFmt("{} -> {} | {} {}\n", candidateA, outputIdx, out, m_opCodes[outputIdx]);
                 }
 
-                if (m_opCodes[outputIdx++] != out)
+                if (m_opCodes[outputIdx] != out)
                 {
                     // printFmt("{} -> {} | {} {}\n", candidateA, outputIdx, out, m_opCodes[outputIdx]);
 
-                    maxAchieved = std::max(maxAchieved, outputIdx);
+                    std::size_t bucket = (candidateA / suffixScale) % achievedLengths.size();
 
-                    achievedLengths[(candidateA / suffixScale) % achievedLengths.size()] += outputIdx;
+                    maxAchieved[bucket] = std::max(maxAchieved[bucket], outputIdx);
+                    achievedLengths[bucket] += outputIdx;
+
                     ip += 100; // Setting it out of range so it gets reset.
                 }
                 else if (outputIdx >= m_opCodes.size())
@@ -328,6 +363,7 @@ uint64_t Day17::calculatePart2()
                 }
                 else
                 {
+                    outputIdx += 1;
                     ip += 2;
                 }
             }
