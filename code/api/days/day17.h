@@ -17,6 +17,8 @@ class Day17 final
 
     std::vector<uint8_t> m_opCodes;
 
+    int64_t getComboOperand(uint8_t opCode);
+
 public:
     Day17();
 
