@@ -11,6 +11,12 @@ class Day17 final
 {
     std::vector<uint8_t> m_buffer;
 
+    uint64_t m_regA;
+    uint64_t m_regB;
+    uint64_t m_regC;
+
+    std::vector<uint8_t> m_opCodes;
+
 public:
     Day17();
 

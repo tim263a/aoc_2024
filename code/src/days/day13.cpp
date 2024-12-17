@@ -12,7 +12,7 @@ Day13::Day13()
 }
 
 template<typename Iter>
-uint64_t readNumber(Iter& it)
+static uint64_t readNumber(Iter& it)
 {
     uint64_t number = 0;
 
