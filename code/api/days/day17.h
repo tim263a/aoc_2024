@@ -2,6 +2,7 @@
 
 #include "days/day.h"
 
+#include <cstddef>
 #include <cstdint>
 
 #include <vector>
@@ -22,6 +23,8 @@ class Day17 final
     uint64_t m_regC;
 
     int64_t getComboOperand(uint8_t opCode);
+    std::vector<int64_t> simulate(bool abortOnOut);
+    uint64_t testFor2(uint64_t prefix, std::size_t backIdx);
 
 public:
     Day17();
