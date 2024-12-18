@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -fdata-sections -ffunction-sections")
 
+remove_definitions(-DNDEBUG) # Don't know why it's set in Release build ...
+
 add_subdirectory(
     ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Catch2
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Catch2)
@@ -47,6 +49,7 @@ target_sources(aoc_main
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/days/day15.cpp
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/days/day16.cpp
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/days/day17.cpp
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/days/day18.cpp
 )
 target_link_libraries(aoc_main
     common
