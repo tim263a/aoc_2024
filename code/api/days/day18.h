@@ -11,6 +11,13 @@ class Day18 final
 {
     std::vector<uint8_t> m_buffer;
 
+    struct Coordinate
+    {
+        int64_t x;
+        int64_t y;
+    };
+    std::vector<Coordinate> m_coordinates;
+
 public:
     Day18();
 
