@@ -136,6 +136,25 @@ void Day19::printTree(const Node& node, std::size_t idx, uint8_t indent,
     }
 }
 
+void Day19::doSomethingRecursively(
+    const std::vector<std::vector<uint8_t>>& letterLengths,
+    uint64_t start)
+{
+    if (start >= letterLengths.size())
+    {
+        return;
+    }
+
+    m_part2 += 1;
+    printFmt("{}\n", m_part2);
+    fflush(stdout);
+
+    for (auto l : letterLengths[start])
+    {
+        doSomethingRecursively(letterLengths, start + l);
+    }
+}
+
 uint64_t Day19::calculatePart1()
 {
     uint64_t sum = 0;
@@ -276,6 +295,21 @@ uint64_t Day19::calculatePart1()
         bool isValid = !letterLengths[0].empty();
         DEBUG_FMT("Target {} valid? {}\n", target, isValid);
         sum += isValid;
+
+        std::vector<uint64_t> validPaths(letterLengths.size() + 1, 0);
+        validPaths[0] = 1;
+
+        for (std::size_t i = 0; i < letterLengths.size(); i++)
+        {
+            for (uint8_t l : letterLengths[i])
+            {
+                validPaths[i + l] += validPaths[i];
+            }
+        }
+
+        m_part2 += *validPaths.rbegin();
+
+        // doSomethingRecursively(letterLengths, 0);
     }
 
     return sum;
@@ -283,7 +317,5 @@ uint64_t Day19::calculatePart1()
 
 uint64_t Day19::calculatePart2()
 {
-    uint64_t sum = 0;
-
-    return sum;
+    return m_part2;
 }
