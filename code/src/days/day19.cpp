@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <memory>
+#include <string>
 
 #include "util/print_fmt.h"
 #include "util/read_input.h"
@@ -75,6 +77,63 @@ void normalizeString(std::string& str)
     }
 }
 
+static uint8_t charIndex(uint8_t c)
+{
+    switch (c)
+    {
+        case 'w':
+            return 0;
+        case 'u':
+            return 1;
+        case 'b':
+            return 2;
+        case 'r':
+            return 3;
+        case 'g':
+            return 4;
+        default:
+            printFmt("Invalid char: {:c}\n", c);
+            std::exit(1);
+    };
+}
+
+static char charFromIndex(uint8_t c)
+{
+    switch (c)
+    {
+        case 0:
+            return 'w';
+        case 1:
+            return 'u';
+        case 2:
+            return 'b';
+        case 3:
+            return 'r';
+        case 4:
+            return 'g';
+        default:
+            printFmt("Invalid char: {:c}\n", c);
+            std::exit(1);
+    };
+}
+
+void Day19::printTree(const Node& node, std::size_t idx, uint8_t indent,
+    const std::string& prefix)
+{
+    if (node.isValid)
+    {
+        printFmt("{:{}s}{:s}\n", "", indent * 2, prefix);
+    }
+
+    for (std::size_t i = 0; i < node.subNodes.size(); i++)
+    {
+        if (node.subNodes[i])
+        {
+            printTree(*node.subNodes[i], i, indent + 1, prefix + charFromIndex(i));
+        }
+    }
+}
+
 uint64_t Day19::calculatePart1()
 {
     uint64_t sum = 0;
@@ -112,6 +171,30 @@ uint64_t Day19::calculatePart1()
         printFmt("{}\n", component);
     }
 #endif
+
+    Node root;
+
+    for (const std::string& component : m_components)
+    {
+        Node* node = &root;
+
+        for (std::size_t i = 0; i < component.size(); i++)
+        {
+            std::size_t cIdx = charIndex(component[i]);
+            std::unique_ptr<Node>& subNode = node->subNodes[cIdx];
+
+            if (!subNode)
+            {
+                subNode = std::make_unique<Node>();
+            }
+
+            node = subNode.get();
+        }
+
+        node->isValid = true;
+    }
+
+    printTree(root, 0, 0);
 
     return sum;
 }
