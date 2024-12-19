@@ -178,7 +178,7 @@ uint64_t Day18::calculatePart1()
                 DEBUG_FMT("Evaluating neighbor {}|{} ... ", nX, nY);
                 neighbor->cameFrom = current;
                 neighbor->gScore = tentativeScore;
-                neighbor->fScore = tentativeScore + (WIDTH - x) + (HEIGHT - y);
+                neighbor->fScore = tentativeScore; // (WIDTH - 1 - x) + (HEIGHT - 1 - y);
                 if (!isInOpen.contains(neighbor))
                 {
                     DEBUG_FMT("adding\n");
