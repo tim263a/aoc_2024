@@ -1,5 +1,6 @@
 #include "days/day19.h"
 
+#include <algorithm>
 #include <cstddef>
 
 #include "util/print_fmt.h"
@@ -100,6 +101,15 @@ uint64_t Day19::calculatePart1()
 
         printFmt("{}", target);
         printFmt("\n");
+    }
+#endif
+
+#if 0
+    std::sort(m_components.begin(), m_components.end());
+    printFmt("Sorted components ({}):\n", m_components.size());
+    for (std::string component : m_components)
+    {
+        printFmt("{}\n", component);
     }
 #endif
 
