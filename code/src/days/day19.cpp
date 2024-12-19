@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdio>
+#include <iterator>
 #include <memory>
 #include <string>
 
@@ -194,7 +196,87 @@ uint64_t Day19::calculatePart1()
         node->isValid = true;
     }
 
+#if 0
     printTree(root, 0, 0);
+#endif
+
+    std::vector<std::vector<uint8_t>> letterLengths;
+    std::vector<const Node*> nodes;
+
+    for (const std::string& target : m_targets)
+    {
+        letterLengths.clear();
+        letterLengths.resize(target.size());
+
+        nodes.clear();
+        nodes.resize(target.size(), &root);
+
+        for (std::size_t i = 0; i < target.size(); i++)
+        {
+            for (std::size_t j = 0; j <= i; j++)
+            {
+                fflush(stdout);
+                const Node*& ptr = nodes[j];
+                fflush(stdout);
+                if (!ptr)
+                {
+                    continue;
+                }
+
+                ptr = ptr->subNodes[charIndex(target[i])].get();
+                fflush(stdout);
+
+                if (ptr && ptr->isValid)
+                {
+                    DEBUG_FMT("i {} j {} -> {:s} ({})\n", i, j,
+                        std::string(target.cbegin() + j, target.cbegin() + i + 1),
+                        i - j + 1);
+
+                    fflush(stdout);
+                    letterLengths[j].push_back(i - j + 1);
+                }
+            }
+        }
+
+        DEBUG_FMT("{}\n", letterLengths[0].size());
+
+        for (std::size_t i = target.size(); i > 0; i--)
+        {
+            std::vector<uint8_t>& lengths = letterLengths[i - 1];
+            // printFmt("{} starts with {}\n", i - 1, lengths.size());
+
+            auto nEnd = std::remove_if(lengths.begin(), lengths.end(),
+                [&] (const uint8_t& length)
+                {
+                    auto nextPos = i - 1 + length;
+
+                    if (nextPos == target.size())
+                    {
+                        return false;
+                    }
+
+                    if (!letterLengths[nextPos].empty())
+                    {
+                        // printFmt("{} has {} entries\n",
+                            // nextPos, letterLengths[nextPos].size());
+                        return false;
+                    }
+
+                    DEBUG_FMT("Removing {} in {}\n", length, i - 1);
+                    return true;
+                });
+
+            if (nEnd != lengths.end())
+            {
+                lengths.resize(std::distance(lengths.begin(), nEnd));
+                DEBUG_FMT("Pruned {} has {}\n", i - 1, lengths.size());
+            }
+        }
+
+        bool isValid = !letterLengths[0].empty();
+        DEBUG_FMT("Target {} valid? {}\n", target, isValid);
+        sum += isValid;
+    }
 
     return sum;
 }
